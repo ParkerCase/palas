@@ -1,0 +1,452 @@
+
+> govcontract-ai@0.1.0 build
+> next build
+
+   ▲ Next.js 15.3.3
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 3.0s
+   Linting and checking validity of types ...
+
+./app/(auth)/login/page.tsx
+6:29  Warning: 'CardHeader' is defined but never used.  @typescript-eslint/no-unused-vars
+6:41  Warning: 'CardTitle' is defined but never used.  @typescript-eslint/no-unused-vars
+75:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/(auth)/signup/page.tsx
+97:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+116:66  Warning: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./app/(dashboard)/ai-command/page.tsx
+134:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/(dashboard)/analytics/page.tsx
+22:11  Warning: 'ApplicationWithOpportunity' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/(dashboard)/applications/[id]/page.tsx
+431:57  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+431:73  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+
+./app/(dashboard)/applications/new/page.tsx
+31:10  Warning: 'useState' is defined but never used.  @typescript-eslint/no-unused-vars
+31:20  Warning: 'useEffect' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/(dashboard)/applications/page.tsx
+7:29  Warning: 'CardHeader' is defined but never used.  @typescript-eslint/no-unused-vars
+7:41  Warning: 'CardTitle' is defined but never used.  @typescript-eslint/no-unused-vars
+34:6  Warning: React Hook useEffect has a missing dependency: 'loadApplications'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./app/(dashboard)/company/certifications/page.tsx
+8:10  Warning: 'Input' is defined but never used.  @typescript-eslint/no-unused-vars
+9:10  Warning: 'Label' is defined but never used.  @typescript-eslint/no-unused-vars
+10:10  Warning: 'Select' is defined but never used.  @typescript-eslint/no-unused-vars
+10:18  Warning: 'SelectContent' is defined but never used.  @typescript-eslint/no-unused-vars
+10:33  Warning: 'SelectItem' is defined but never used.  @typescript-eslint/no-unused-vars
+10:45  Warning: 'SelectTrigger' is defined but never used.  @typescript-eslint/no-unused-vars
+10:60  Warning: 'SelectValue' is defined but never used.  @typescript-eslint/no-unused-vars
+16:3  Warning: 'Building2' is defined but never used.  @typescript-eslint/no-unused-vars
+25:11  Warning: 'Certification' is defined but never used.  @typescript-eslint/no-unused-vars
+130:32  Warning: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./app/(dashboard)/company/page.tsx
+11:3  Warning: 'Users' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/(dashboard)/company/settings/page.tsx
+19:3  Warning: 'Globe' is defined but never used.  @typescript-eslint/no-unused-vars
+186:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+618:34  Warning: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./app/(dashboard)/company/subscription/page.tsx
+4:10  Warning: 'useRouter' is defined but never used.  @typescript-eslint/no-unused-vars
+62:11  Warning: 'canceled' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+73:6  Warning: React Hook useEffect has a missing dependency: 'loadUserAndSubscription'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+216:68  Warning: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+222:40  Warning: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./app/(dashboard)/company/team/page.tsx
+5:41  Warning: 'CardTitle' is defined but never used.  @typescript-eslint/no-unused-vars
+8:10  Warning: 'Input' is defined but never used.  @typescript-eslint/no-unused-vars
+9:10  Warning: 'Label' is defined but never used.  @typescript-eslint/no-unused-vars
+10:10  Warning: 'Textarea' is defined but never used.  @typescript-eslint/no-unused-vars
+11:10  Warning: 'Select' is defined but never used.  @typescript-eslint/no-unused-vars
+11:18  Warning: 'SelectContent' is defined but never used.  @typescript-eslint/no-unused-vars
+11:33  Warning: 'SelectItem' is defined but never used.  @typescript-eslint/no-unused-vars
+11:45  Warning: 'SelectTrigger' is defined but never used.  @typescript-eslint/no-unused-vars
+11:60  Warning: 'SelectValue' is defined but never used.  @typescript-eslint/no-unused-vars
+25:3  Warning: 'Trash' is defined but never used.  @typescript-eslint/no-unused-vars
+26:3  Warning: 'MoreHorizontal' is defined but never used.  @typescript-eslint/no-unused-vars
+30:11  Warning: 'TeamMember' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/(dashboard)/courses/[courseId]/page.tsx
+51:6  Warning: React Hook useEffect has a missing dependency: 'fetchCourseData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+267:35  Warning: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./app/(dashboard)/courses/page.tsx
+5:16  Warning: 'Lock' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/(dashboard)/dashboard/page.tsx
+44:6  Warning: React Hook useEffect has a missing dependency: 'loadDashboardData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./app/(dashboard)/education/page.tsx
+71:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+98:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/(dashboard)/healthcare/page.tsx
+10:10  Warning: 'Users' is defined but never used.  @typescript-eslint/no-unused-vars
+70:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+91:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/(dashboard)/opportunities/[id]/apply/page.tsx
+11:10  Warning: 'Badge' is defined but never used.  @typescript-eslint/no-unused-vars
+20:3  Warning: 'TrendingUp' is defined but never used.  @typescript-eslint/no-unused-vars
+50:50  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+209:9  Warning: 'getProgressColor' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+223:34  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+223:55  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+
+./app/(dashboard)/opportunities/page.tsx
+6:29  Warning: 'CardHeader' is defined but never used.  @typescript-eslint/no-unused-vars
+6:41  Warning: 'CardTitle' is defined but never used.  @typescript-eslint/no-unused-vars
+10:11  Warning: 'Filter' is defined but never used.  @typescript-eslint/no-unused-vars
+11:27  Warning: 'TrendingUp' is defined but never used.  @typescript-eslint/no-unused-vars
+46:6  Warning: React Hook useEffect has a missing dependency: 'searchOpportunities'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+68:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/(dashboard)/support/page.tsx
+17:3  Warning: 'FileText' is defined but never used.  @typescript-eslint/no-unused-vars
+185:75  Warning: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+201:49  Warning: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./app/api/ai/analyze-application/route.ts
+15:11  Warning: 'AIAnalysis' is defined but never used.  @typescript-eslint/no-unused-vars
+55:11  Warning: 'analysisPrompt' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+127:10  Warning: 'calculateBasicQualityScore' is defined but never used.  @typescript-eslint/no-unused-vars
+141:10  Warning: 'generateBasicStrengths' is defined but never used.  @typescript-eslint/no-unused-vars
+164:10  Warning: 'generateBasicImprovements' is defined but never used.  @typescript-eslint/no-unused-vars
+186:10  Warning: 'calculateBasicWinProbability' is defined but never used.  @typescript-eslint/no-unused-vars
+204:10  Warning: 'generateBasicRecommendations' is defined but never used.  @typescript-eslint/no-unused-vars
+204:39  Warning: 'applicationData' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/applications/route.ts
+4:10  Warning: 'generateApplicationId' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/debug/route.ts
+4:27  Warning: 'request' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/debug-auth/route.ts
+5:27  Warning: 'request' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/education/route.ts
+32:60  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+44:55  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/api/government/route.ts
+551:60  Warning: 'limit' is defined but never used.  @typescript-eslint/no-unused-vars
+748:28  Warning: 'agencyName' is defined but never used.  @typescript-eslint/no-unused-vars
+783:30  Warning: 'agencyName' is defined but never used.  @typescript-eslint/no-unused-vars
+787:31  Warning: 'agencyName' is defined but never used.  @typescript-eslint/no-unused-vars
+827:32  Warning: 'agencyCode' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/grants/search/route.ts
+22:19  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/api/healthcare/route.ts
+31:63  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+38:55  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/api/manufacturing/route.ts
+472:11  Warning: 'desc' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+902:35  Warning: 'industry' is defined but never used.  @typescript-eslint/no-unused-vars
+916:32  Warning: 'industry' is defined but never used.  @typescript-eslint/no-unused-vars
+936:32  Warning: 'industry' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/opportunities/[id]/route.ts
+194:41  Warning: 'opportunityId' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/opportunities/route.ts
+48:48  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+80:56  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+140:40  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+140:54  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/api/opportunities/search/route.ts
+16:13  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+17:11  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+77:11  Warning: 'GrantsGovOpportunity' is defined but never used.  @typescript-eslint/no-unused-vars
+186:37  Warning: 'profileError' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+195:43  Warning: 'companyError' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+476:14  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/stripe/portal/route.ts
+10:28  Warning: 'request' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/stripe/subscription/route.ts
+10:27  Warning: 'request' is defined but never used.  @typescript-eslint/no-unused-vars
+57:51  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/api/subscriptions/webhooks/stripe/route.ts
+57:13  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+109:13  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+139:13  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+153:13  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/api/test/ai/route.ts
+4:27  Warning: 'request' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/test/education/route.ts
+34:25  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+35:30  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+161:66  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+162:65  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./app/api/test/grants-gov/route.ts
+3:27  Warning: 'request' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/api/test/sam-gov/route.ts
+3:27  Warning: 'request' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/diagnostic/page.tsx
+3:20  Warning: 'useEffect' is defined but never used.  @typescript-eslint/no-unused-vars
+9:44  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+10:50  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+11:50  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+167:50  Warning: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./app/setup/page.tsx
+67:16  Warning: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+
+./app/test/page.tsx
+13:13  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+24:9  Warning: The 'runTests' function makes the dependencies of useEffect Hook (at line 131) change on every render. To fix this, wrap the definition of 'runTests' in its own useCallback() Hook.  react-hooks/exhaustive-deps
+45:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+70:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+95:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+120:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/user-setup/page.tsx
+49:14  Warning: 'error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./app/working-dashboard/page.tsx
+13:36  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+14:42  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/SectorComingSoon.tsx
+14:3  Warning: 'Users' is defined but never used.  @typescript-eslint/no-unused-vars
+35:18  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+63:6  Warning: React Hook useEffect has a missing dependency: 'fetchSectorData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+103:9  Warning: 'formatCurrency' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+270:90  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/ai/AIChatbot.tsx
+10:3  Warning: 'Search' is defined but never used.  @typescript-eslint/no-unused-vars
+11:3  Warning: 'TrendingUp' is defined but never used.  @typescript-eslint/no-unused-vars
+12:3  Warning: 'Target' is defined but never used.  @typescript-eslint/no-unused-vars
+13:3  Warning: 'Zap' is defined but never used.  @typescript-eslint/no-unused-vars
+14:3  Warning: 'MessageSquare' is defined but never used.  @typescript-eslint/no-unused-vars
+17:3  Warning: 'Sparkles' is defined but never used.  @typescript-eslint/no-unused-vars
+28:10  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+62:11  Warning: 'toast' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+244:9  Warning: 'formatCurrency' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./components/ai/AICommandCenter.tsx
+1:27  Warning: 'useRef' is defined but never used.  @typescript-eslint/no-unused-vars
+8:3  Warning: 'Bot' is defined but never used.  @typescript-eslint/no-unused-vars
+15:3  Warning: 'Users' is defined but never used.  @typescript-eslint/no-unused-vars
+16:3  Warning: 'DollarSign' is defined but never used.  @typescript-eslint/no-unused-vars
+17:3  Warning: 'Clock' is defined but never used.  @typescript-eslint/no-unused-vars
+18:3  Warning: 'CheckCircle' is defined but never used.  @typescript-eslint/no-unused-vars
+28:3  Warning: 'ArrowRight' is defined but never used.  @typescript-eslint/no-unused-vars
+47:10  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+80:11  Warning: 'toast' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+86:6  Warning: React Hook useEffect has a missing dependency: 'generateLiveInsights'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+163:58  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+164:63  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/construction/ConstructionIntelligenceDashboard.tsx
+21:3  Warning: 'FileText' is defined but never used.  @typescript-eslint/no-unused-vars
+24:3  Warning: 'CheckCircle' is defined but never used.  @typescript-eslint/no-unused-vars
+27:3  Warning: 'Activity' is defined but never used.  @typescript-eslint/no-unused-vars
+244:6  Warning: React Hook useEffect has a missing dependency: 'searchCompanies'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./components/dashboard/DashboardNav.tsx
+37:10  Warning: 'isSearchFocused' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./components/dashboard/DashboardSidebar.tsx
+43:9  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./components/dashboard/DashboardStats.tsx
+2:29  Warning: 'CardHeader' is defined but never used.  @typescript-eslint/no-unused-vars
+2:41  Warning: 'CardTitle' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/dashboard/QuickActions.tsx
+3:10  Warning: 'Button' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/dashboard/RecentOpportunities.tsx
+88:22  Warning: '_error' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/education/EducationIntelligenceDashboard.tsx
+27:3  Warning: 'AlertCircle' is defined but never used.  @typescript-eslint/no-unused-vars
+29:3  Warning: 'Clock' is defined but never used.  @typescript-eslint/no-unused-vars
+84:15  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+86:22  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+93:25  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+104:24  Warning: 'setSelectedSize' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+249:6  Warning: React Hook useEffect has a missing dependency: 'searchInstitutions'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+791:55  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+791:73  Warning: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+
+./components/government/GovernmentIntelligenceDashboard.tsx
+20:3  Warning: 'FileText' is defined but never used.  @typescript-eslint/no-unused-vars
+23:3  Warning: 'CheckCircle' is defined but never used.  @typescript-eslint/no-unused-vars
+26:3  Warning: 'Activity' is defined but never used.  @typescript-eslint/no-unused-vars
+251:6  Warning: React Hook useEffect has a missing dependency: 'searchEntities'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./components/healthcare/HealthcareIntelligenceDashboard.tsx
+21:3  Warning: 'FileText' is defined but never used.  @typescript-eslint/no-unused-vars
+24:3  Warning: 'CheckCircle' is defined but never used.  @typescript-eslint/no-unused-vars
+242:6  Warning: React Hook useEffect has a missing dependency: 'searchProviders'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./components/manufacturing/ManufacturingIntelligenceDashboard.tsx
+21:3  Warning: 'FileText' is defined but never used.  @typescript-eslint/no-unused-vars
+24:3  Warning: 'CheckCircle' is defined but never used.  @typescript-eslint/no-unused-vars
+27:3  Warning: 'Activity' is defined but never used.  @typescript-eslint/no-unused-vars
+246:6  Warning: React Hook useEffect has a missing dependency: 'searchCompanies'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./components/ui/input.tsx
+5:11  Warning: An interface declaring no members is equivalent to its supertype.  @typescript-eslint/no-empty-object-type
+
+./components/ui/textarea.tsx
+5:11  Warning: An interface declaring no members is equivalent to its supertype.  @typescript-eslint/no-empty-object-type
+
+./lib/ai/anthropic.ts
+137:47  Warning: 'documentUrl' is defined but never used.  @typescript-eslint/no-unused-vars
+355:18  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+375:22  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+376:29  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+380:19  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+381:19  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+477:22  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+478:29  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./lib/ai/openai.ts
+116:47  Warning: 'documentUrl' is defined but never used.  @typescript-eslint/no-unused-vars
+138:48  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+160:68  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./lib/auth/index.ts
+2:10  Warning: 'cookies' is defined but never used.  @typescript-eslint/no-unused-vars
+384:11  Warning: 'inviteUrl' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./lib/payments/stripe.ts
+337:15  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+381:15  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+411:15  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+440:15  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+459:15  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./lib/supabase/types.ts
+16:33  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+25:21  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+76:25  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+78:22  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+79:25  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+80:32  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+103:31  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+104:33  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+107:30  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+   Collecting page data ...
+   Generating static pages (0/51) ...
+   Generating static pages (12/51) 
+   Generating static pages (25/51) 
+   Generating static pages (38/51) 
+ ✓ Generating static pages (51/51)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                 Size  First Load JS
+┌ ƒ /                                    5.37 kB         155 kB
+├ ƒ /_not-found                            981 B         102 kB
+├ ƒ /ai-command                          6.43 kB         156 kB
+├ ƒ /analytics                           2.16 kB         117 kB
+├ ƒ /api/ai/analyze-application            237 B         101 kB
+├ ƒ /api/ai/analyze-document               237 B         101 kB
+├ ƒ /api/ai/chat                           237 B         101 kB
+├ ƒ /api/ai/match-opportunities            237 B         101 kB
+├ ƒ /api/ai/score-quality                  237 B         101 kB
+├ ƒ /api/applications                      237 B         101 kB
+├ ƒ /api/applications/[id]                 237 B         101 kB
+├ ƒ /api/applications/submit               237 B         101 kB
+├ ƒ /api/auth/create-simple-user           237 B         101 kB
+├ ƒ /api/auth/create-test-user             237 B         101 kB
+├ ƒ /api/auth/setup-existing-user          237 B         101 kB
+├ ƒ /api/awarded-contracts/search          237 B         101 kB
+├ ƒ /api/construction                      237 B         101 kB
+├ ƒ /api/contracts/search                  237 B         101 kB
+├ ƒ /api/contracts/usaspending             237 B         101 kB
+├ ƒ /api/debug                             237 B         101 kB
+├ ƒ /api/debug-auth                        237 B         101 kB
+├ ƒ /api/education                         237 B         101 kB
+├ ƒ /api/government                        237 B         101 kB
+├ ƒ /api/grants/search                     237 B         101 kB
+├ ƒ /api/health                            237 B         101 kB
+├ ƒ /api/healthcare                        237 B         101 kB
+├ ƒ /api/manufacturing                     237 B         101 kB
+├ ƒ /api/opportunities                     237 B         101 kB
+├ ƒ /api/opportunities/[id]                237 B         101 kB
+├ ƒ /api/opportunities/search              237 B         101 kB
+├ ƒ /api/stripe/checkout                   237 B         101 kB
+├ ƒ /api/stripe/portal                     237 B         101 kB
+├ ƒ /api/stripe/subscription               237 B         101 kB
+├ ƒ /api/subscriptions/webhooks/stripe     237 B         101 kB
+├ ƒ /api/test-setup                        237 B         101 kB
+├ ƒ /api/test/ai                           237 B         101 kB
+├ ƒ /api/test/education                    237 B         101 kB
+├ ƒ /api/test/grants-gov                   237 B         101 kB
+├ ƒ /api/test/sam-gov                      237 B         101 kB
+├ ƒ /api/webhooks/stripe                   237 B         101 kB
+├ ƒ /applications                         4.8 kB         155 kB
+├ ƒ /applications/[id]                   2.18 kB         121 kB
+├ ƒ /applications/new                    3.11 kB         146 kB
+├ ƒ /callback                              237 B         101 kB
+├ ƒ /company                             1.34 kB         120 kB
+├ ƒ /company/certifications                179 B         105 kB
+├ ƒ /company/settings                    7.83 kB         180 kB
+├ ƒ /company/subscription                5.26 kB         151 kB
+├ ƒ /company/team                        1.34 kB         120 kB
+├ ƒ /construction                        4.74 kB         185 kB
+├ ƒ /courses                             8.28 kB         146 kB
+├ ƒ /courses/[courseId]                  3.13 kB         141 kB
+├ ƒ /dashboard                           5.55 kB         156 kB
+├ ƒ /diagnostic                          3.62 kB         150 kB
+├ ƒ /education                           6.56 kB         157 kB
+├ ƒ /fix-auth                            2.92 kB         149 kB
+├ ƒ /government                          4.69 kB         185 kB
+├ ƒ /healthcare                          6.22 kB         156 kB
+├ ƒ /login                               9.43 kB         155 kB
+├ ƒ /manufacturing                       4.92 kB         185 kB
+├ ƒ /opportunities                       6.11 kB         156 kB
+├ ƒ /opportunities/[id]                    179 B         105 kB
+├ ƒ /opportunities/[id]/apply            8.67 kB         155 kB
+├ ƒ /reset-password                      4.35 kB         154 kB
+├ ƒ /setup                               5.57 kB         115 kB
+├ ƒ /signup                              4.64 kB         154 kB
+├ ƒ /simple-setup                        3.44 kB         149 kB
+├ ƒ /support                             2.14 kB         145 kB
+├ ƒ /test                                5.23 kB         115 kB
+├ ƒ /test-dashboard                        175 B         105 kB
+├ ƒ /test-supabase                       3.69 kB         113 kB
+├ ƒ /user-setup                          3.36 kB         113 kB
+└ ƒ /working-dashboard                   8.32 kB         158 kB
++ First Load JS shared by all             101 kB
+  ├ chunks/1684-b5376ee246a13ee1.js      45.9 kB
+  ├ chunks/4bd1b696-bcdbedf9cc94154e.js  53.2 kB
+  └ other shared chunks (total)          1.97 kB
+
+
+ƒ Middleware                             66.4 kB
+
+ƒ  (Dynamic)  server-rendered on demand
+
