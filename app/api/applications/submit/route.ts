@@ -27,11 +27,11 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData()
     
     // Extract form values by converting FormData to a plain object
-    const formEntries: Record<string, string> = {}
+        const formEntries: Record<string, string> = {}
     const files: Record<string, File> = {}
-    
-    // @ts-expect-error - FormData.entries() exists but TypeScript doesn't recognize it
-    for (const [key, value] of formData.entries()) {
+
+    // @ts-ignore - FormData methods exist but TypeScript doesn't recognize them
+    for (const [key, value] of (formData as any).entries()) {
       if (value instanceof File) {
         files[key] = value
       } else {
