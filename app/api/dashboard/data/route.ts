@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { createServerClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createSupabaseServerClient()
+    const supabase = createServerClient()
     
     // Get real government data from USAspending API
     const usaspendingResponse = await fetch(
@@ -16,7 +16,15 @@ export async function GET(request: NextRequest) {
       }
     )
 
-    let recentOpportunities = []
+    let recentOpportunities: Array<{
+      id: string
+      title: string
+      agency: string
+      amount_max: number
+      application_deadline: string
+      fit_score: number
+    }> = []
+    
     if (usaspendingResponse.ok) {
       const usaspendingData = await usaspendingResponse.json()
       
@@ -101,9 +109,9 @@ export async function GET(request: NextRequest) {
     const metrics = {
       active_applications: recentOpportunities.length,
       win_rate: 23.5, // This would be calculated from historical data
-      total_awarded: recentOpportunities.reduce((sum, opp) => sum + opp.amount_max, 0),
+      total_awarded: recentOpportunities.reduce((sum: number, opp: any) => sum + opp.amount_max, 0),
       avg_response_time: 45, // Average days from application to response
-      pending_deadlines: recentOpportunities.filter(opp => 
+      pending_deadlines: recentOpportunities.filter((opp: any) => 
         new Date(opp.application_deadline) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
       ).length
     }
@@ -137,7 +145,7 @@ export async function GET(request: NextRequest) {
     ]
 
     // Generate recent applications
-    const applications = recentOpportunities.slice(0, 3).map((opp, index) => ({
+    const applications = recentOpportunities.slice(0, 3).map((opp: any, index: number) => ({
       id: `app-${index + 1}`,
       title: opp.title,
       status: ['submitted', 'under_review', 'approved'][index],
@@ -198,15 +206,45 @@ export async function GET(request: NextRequest) {
           message: 'Your application for "Advanced Cybersecurity Solutions" is due in 5 days.',
           created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
           read: false
+        },
+        {
+          id: 'notif-002',
+          type: 'status_update',
+          title: 'Application Status Update',
+          message: 'Your application for "Clean Energy Research Grant Program" has been submitted successfully.',
+          created_at: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
+          read: false
+        },
+        {
+          id: 'notif-003',
+          type: 'new_opportunity',
+          title: 'New Matching Opportunity',
+          message: 'Found a new opportunity that matches your profile: "AI Healthcare Analytics Platform"',
+          created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+          read: true
         }
       ],
       applications: [
         {
-          id: 'app-001',
-          title: 'Advanced Cybersecurity Solutions',
+          id: 'app-1',
+          title: 'Advanced Cybersecurity Solutions for Federal Agencies',
           status: 'submitted',
           submitted_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
           estimated_value: 15000000
+        },
+        {
+          id: 'app-2',
+          title: 'Clean Energy Research Grant Program',
+          status: 'under_review',
+          submitted_at: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
+          estimated_value: 5000000
+        },
+        {
+          id: 'app-3',
+          title: 'AI Healthcare Analytics Platform',
+          status: 'approved',
+          submitted_at: new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString(),
+          estimated_value: 8500000
         }
       ]
     })
