@@ -215,9 +215,9 @@ export default function DashboardPage() {
             <div className="flex items-center space-x-4">
               <button className="relative p-2 text-gray-600 hover:text-gray-900">
                 <Bell className="h-6 w-6" />
-                {dashboardData?.notifications?.filter(n => !n.read).length > 0 && (
+                {(dashboardData?.notifications?.filter(n => !n.read) || []).length > 0 && (
                   <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                    {dashboardData?.notifications?.filter(n => !n.read).length}
+                    {(dashboardData?.notifications?.filter(n => !n.read) || []).length}
                   </span>
                 )}
               </button>
