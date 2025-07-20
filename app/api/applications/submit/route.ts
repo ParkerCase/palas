@@ -30,8 +30,9 @@ export async function POST(request: NextRequest) {
         const formEntries: Record<string, string> = {}
     const files: Record<string, File> = {}
 
-    // @ts-ignore - FormData methods exist but TypeScript doesn't recognize them
-    for (const [key, value] of (formData as any).entries()) {
+    // Use type assertion to bypass TypeScript limitations with FormData
+    const formDataEntries = (formData as any).entries()
+    for (const [key, value] of formDataEntries) {
       if (value instanceof File) {
         files[key] = value
       } else {
