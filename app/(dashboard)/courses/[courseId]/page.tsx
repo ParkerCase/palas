@@ -97,10 +97,10 @@ export default function CourseDetailPage() {
       }
 
       const completedModules = new Set(
-        moduleProgress?.filter(p => p.completed_at).map(p => p.module_id) || []
+        moduleProgress?.filter((p: { completed_at: string | null; module_id: string }) => p.completed_at).map((p: { completed_at: string | null; module_id: string }) => p.module_id) || []
       );
 
-      const modulesWithProgress = modulesData?.map(module => ({
+      const modulesWithProgress = modulesData?.map((module: Module) => ({
         ...module,
         completed: completedModules.has(module.id)
       })) || [];
