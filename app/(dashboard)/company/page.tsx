@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { useToast } from '@/hooks/use-toast'
 import { createClientComponentClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -109,55 +109,74 @@ export default function CompanyPage() {
 
   useEffect(() => {
     loadData()
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadData = async () => {
     try {
+      console.log('Loading company data...')
       const { data: { user: currentUser } } = await supabase.auth.getUser()
+      console.log('Current user:', currentUser)
+      
       if (currentUser) {
-        setUser(currentUser)
-        
-        // Get company data
-        const { data: companyData } = await supabase
-          .from('companies')
-          .select('*')
-          .eq('user_id', currentUser.id)
+        // Get company data - first try to get from user's profile
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('company_id, role')
+          .eq('id', currentUser.id)
           .single()
         
-        if (companyData) {
-          setCompany(companyData)
-          setCompanyData(companyData)
-          
-          // Load additional company data
-          const companyId = companyData.id
-          
-          // Get team members
-          const { data: teamMembers } = await supabase
-            .from('profiles')
-            .select('id, full_name, email, role, last_sign_in_at, created_at')
-            .eq('company_id', companyId)
-            .order('created_at', { ascending: false })
-
-          // Get subscription
-          const { data: subscription } = await supabase
-            .from('subscriptions')
+        setUser({ ...currentUser, role: profile?.role })
+        
+        console.log('Profile data:', profile)
+        
+        if (profile?.company_id) {
+          // Get company data using company_id from profile
+          const { data: companyData } = await supabase
+            .from('companies')
             .select('*')
-            .eq('company_id', companyId)
+            .eq('id', profile.company_id)
             .single()
+          
+          console.log('Company data:', companyData)
+          
+          if (companyData) {
+            setCompany(companyData)
+            setCompanyData(companyData)
+            
+            // Load additional company data
+            const companyId = companyData.id
+            
+            // Get team members
+            const { data: teamMembers } = await supabase
+              .from('profiles')
+              .select('id, full_name, email, role, last_sign_in_at, created_at')
+              .eq('company_id', companyId)
+              .order('created_at', { ascending: false })
 
-          // Get certifications
-          const { data: certifications } = await supabase
-            .from('certifications')
-            .select('*')
-            .eq('company_id', companyId)
-            .order('created_at', { ascending: false })
+            // Get subscription
+            const { data: subscription } = await supabase
+              .from('subscriptions')
+              .select('*')
+              .eq('company_id', companyId)
+              .single()
 
-          setData({
-            company: companyData,
-            teamMembers: teamMembers || [],
-            subscription: subscription || null,
-            certifications: certifications || []
-          })
+            // Get certifications
+            const { data: certifications } = await supabase
+              .from('certifications')
+              .select('*')
+              .eq('company_id', companyId)
+              .order('created_at', { ascending: false })
+
+            const finalData = {
+              company: companyData,
+              teamMembers: teamMembers || [],
+              subscription: subscription || null,
+              certifications: certifications || []
+            }
+            
+            console.log('Final data:', finalData)
+            setData(finalData)
+          }
         }
       }
     } catch (error) {
@@ -168,9 +187,11 @@ export default function CompanyPage() {
   }
 
   const canManage = user?.role === 'company_owner' || user?.role === 'admin'
+  
+  console.log('User role:', user?.role, 'Can manage:', canManage)
 
   const handleInputChange = (field: string, value: any) => {
-    setCompanyData(prev => ({
+    setCompanyData((prev: any) => ({
       ...prev,
       [field]: value
     }))
@@ -214,8 +235,19 @@ export default function CompanyPage() {
     )
   }
 
+  console.log('Render state:', { user, company, data, loading })
+
   if (!user || !company) {
-    return null
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Loading Company Data</h2>
+          <p className="text-gray-600">User: {user ? 'Loaded' : 'Not loaded'}</p>
+          <p className="text-gray-600">Company: {company ? 'Loaded' : 'Not loaded'}</p>
+          <p className="text-gray-600">Data: {data ? 'Loaded' : 'Not loaded'}</p>
+        </div>
+      </div>
+    )
   }
 
   return (
