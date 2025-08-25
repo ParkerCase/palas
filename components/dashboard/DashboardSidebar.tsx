@@ -43,6 +43,7 @@ interface NavigationItem {
   icon: any
   current: boolean
   featured?: boolean
+  disabled?: boolean
 }
 
 const navigation: NavigationItem[] = [
@@ -53,14 +54,7 @@ const navigation: NavigationItem[] = [
     current: false,
   },
   {
-    name: 'AI Command Center',
-    href: '/ai-command',
-    icon: Brain,
-    current: false,
-    featured: true,
-  },
-  {
-    name: 'Opportunities',
+    name: 'Bid Opportunities',
     href: '/opportunities',
     icon: Target,
     current: false,
@@ -93,34 +87,39 @@ const navigation: NavigationItem[] = [
 
 const sectorNavigation = [
   {
-    name: 'Education Intelligence',
+    name: 'Education',
     href: '/education',
     icon: GraduationCap,
     current: false,
+    disabled: true,
   },
   {
-    name: 'Healthcare Intelligence',
+    name: 'Healthcare',
     href: '/healthcare',
     icon: Heart,
     current: false,
+    disabled: true,
   },
   {
-    name: 'Construction Intelligence',
+    name: 'Construction',
     href: '/construction',
     icon: HardHat,
     current: false,
+    disabled: true,
   },
   {
-    name: 'Manufacturing Intelligence',
+    name: 'Manufacturing',
     href: '/manufacturing',
     icon: Factory,
     current: false,
+    disabled: true,
   },
   {
-    name: 'Government Intelligence',
+    name: 'Government',
     href: '/government',
     icon: Building2,
     current: false,
+    disabled: true,
   },
 ]
 
@@ -131,18 +130,18 @@ const adminNavigation = [
     icon: CreditCard,
     current: false,
   },
-  {
-    name: 'Team',
-    href: '/company/team',
-    icon: Users,
-    current: false,
-  },
-  {
-    name: 'Settings',
-    href: '/company/settings',
-    icon: Settings,
-    current: false,
-  },
+  // {
+  //   name: 'Team',
+  //   href: '/company/team',
+  //   icon: Users,
+  //   current: false,
+  // },
+  // {
+  //   name: 'Settings',
+  //   href: '/company/settings',
+  //   icon: Settings,
+  //   current: false,
+  // },
 ]
 
 const supportNavigation = [
@@ -222,7 +221,7 @@ export default function DashboardSidebar({ user, company }: DashboardSidebarProp
         <div className="pt-4">
           {!collapsed && (
             <p className="px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-              Sector Intelligence
+              Sectors
             </p>
           )}
           <div className="mt-2 space-y-1">
@@ -230,24 +229,49 @@ export default function DashboardSidebar({ user, company }: DashboardSidebarProp
               const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
               return (
                 <div key={item.name} className="relative">
-                  <Link
-                    href={item.href}
-                    className={cn(
-                      "group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors",
-                      isActive
-                        ? "bg-blue-50 text-blue-700"
-                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                    )}
-                  >
-                    <item.icon
+                  {item.disabled ? (
+                    <div
                       className={cn(
-                        "flex-shrink-0 h-5 w-5",
-                        collapsed ? "mr-0" : "mr-3",
-                        isActive ? "text-blue-500" : "text-gray-400 group-hover:text-gray-500"
+                        "group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors cursor-not-allowed opacity-50",
+                        "text-gray-400"
                       )}
-                    />
-                    {!collapsed && item.name}
-                  </Link>
+                    >
+                      <item.icon
+                        className={cn(
+                          "flex-shrink-0 h-5 w-5",
+                          collapsed ? "mr-0" : "mr-3",
+                          "text-gray-400"
+                        )}
+                      />
+                      {!collapsed && (
+                        <div className="flex items-center space-x-2">
+                          <span className="text-gray-400">{item.name}</span>
+                          <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-full">
+                            Coming Soon
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <Link
+                      href={item.href}
+                      className={cn(
+                        "group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors",
+                        isActive
+                          ? "bg-blue-50 text-blue-700"
+                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                      )}
+                    >
+                      <item.icon
+                        className={cn(
+                          "flex-shrink-0 h-5 w-5",
+                          collapsed ? "mr-0" : "mr-3",
+                          isActive ? "text-blue-500" : "text-gray-400 group-hover:text-gray-500"
+                        )}
+                      />
+                      {!collapsed && item.name}
+                    </Link>
+                  )}
                 </div>
               )
             })}

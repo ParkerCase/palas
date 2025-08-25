@@ -139,7 +139,7 @@ export default function ApplicationsPage() {
               </p>
               <Button onClick={() => router.push('/opportunities')}>
                 <Plus className="h-4 w-4 mr-2" />
-                Find Opportunities
+                Request Opportunities
               </Button>
             </CardContent>
           </Card>

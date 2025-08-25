@@ -85,17 +85,14 @@ function getStatusIcon(status: string) {
 }
 
 const commonCertifications = [
-  { name: 'SBA - Small Business Administration', authority: 'Small Business Administration' },
-  { name: 'WOSB - Woman-Owned Small Business', authority: 'Small Business Administration' },
-  { name: 'VOSB - Veteran-Owned Small Business', authority: 'Department of Veterans Affairs' },
-  { name: '8(a) - Small Disadvantaged Business', authority: 'Small Business Administration' },
-  { name: 'HUBZone - Historically Underutilized Business Zone', authority: 'Small Business Administration' },
-  { name: 'SDVOSB - Service-Disabled Veteran-Owned Small Business', authority: 'Department of Veterans Affairs' },
-  { name: 'ISO 9001 - Quality Management', authority: 'International Organization for Standardization' },
-  { name: 'ISO 27001 - Information Security', authority: 'International Organization for Standardization' },
-  { name: 'SOC 2 - Security & Availability', authority: 'AICPA' },
-  { name: 'FedRAMP - Federal Risk and Authorization Management Program', authority: 'General Services Administration' },
-  { name: 'CMMI - Capability Maturity Model Integration', authority: 'CMMI Institute' }
+  { name: 'Service Disabled Veteran Own Company', authority: 'Service Disabled Veteran Own Company' },
+  { name: 'Women Owned - Issued by the SBA', authority: 'Women Owned - Issued by the SBA' },
+  { name: 'Micro - Business Enterprise', authority: 'Micro- Business Enterprise' },
+  { name: 'Female Veteran Company', authority: 'Female Veteran Company' },
+  { name: 'Veterans Owned Company', authority: 'Veterans Owned Company' },
+  { name: 'Low Income Designation Business', authority: 'Low Income Designation Business' },
+  { name: 'Solopreneur Designation', authority: 'Solopreneur Designation' }
+ 
 ]
 
 export default async function CertificationsPage() {

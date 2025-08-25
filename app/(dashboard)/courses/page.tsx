@@ -200,7 +200,7 @@ export default function CoursesPage() {
                 Dashboard
               </Button>
               <Button variant="ghost" onClick={() => router.push('/opportunities')}>
-                Find Opportunities
+                Request Opportunities
               </Button>
             </div>
           </div>

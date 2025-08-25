@@ -283,7 +283,7 @@ const AICommandCenter = () => {
         onClick={() => handleSendMessage('Find high-match opportunities for my company')}
       >
         <Search className="h-5 w-5" />
-        <span className="text-sm">Find Opportunities</span>
+        <span className="text-sm">Request Opportunities</span>
       </Button>
       <Button 
         variant="outline" 

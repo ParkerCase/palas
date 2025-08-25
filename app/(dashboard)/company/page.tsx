@@ -1,7 +1,8 @@
-export const dynamic = 'force-dynamic'
+'use client'
 
-import { getCurrentUser, getCurrentCompany } from '@/lib/auth'
-import { createServerClient } from '@/lib/supabase/server'
+import { useState, useEffect, useCallback } from 'react'
+import { useToast } from '@/hooks/use-toast'
+import { createClientComponentClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -17,9 +18,15 @@ import {
   Edit,
   Plus,
   Target,
-  User
+  User,
+  Save,
+  X
 } from 'lucide-react'
 import Link from 'next/link'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 interface Certification {
   id: string
@@ -38,62 +45,6 @@ interface TeamMember {
   role: string
   last_sign_in_at?: string
   created_at: string
-}
-
-interface CompanyData {
-  company: Record<string, unknown>
-  teamMembers: TeamMember[]
-  subscription: Record<string, unknown> | null
-  certifications: Certification[]
-}
-
-async function getCompanyData(companyId: string): Promise<CompanyData> {
-  const supabase = await createServerClient()
-
-  try {
-    // Get company profile
-    const { data: company } = await supabase
-      .from('companies')
-      .select('*')
-      .eq('id', companyId)
-      .single()
-
-    // Get team members
-    const { data: teamMembers } = await supabase
-      .from('profiles')
-      .select('id, full_name, email, role, last_sign_in_at, created_at')
-      .eq('company_id', companyId)
-      .order('created_at', { ascending: false })
-
-    // Get subscription
-    const { data: subscription } = await supabase
-      .from('subscriptions')
-      .select('*')
-      .eq('company_id', companyId)
-      .single()
-
-    // Get certifications
-    const { data: certifications } = await supabase
-      .from('certifications')
-      .select('*')
-      .eq('company_id', companyId)
-      .order('created_at', { ascending: false })
-
-    return {
-      company: company || {},
-      teamMembers: teamMembers || [],
-      subscription: subscription || null,
-      certifications: certifications || []
-    }
-  } catch (error) {
-    console.error('Error fetching company data:', error)
-    return {
-      company: {},
-      teamMembers: [],
-      subscription: null,
-      certifications: []
-    }
-  }
 }
 
 function formatDate(dateString: string) {
@@ -145,37 +96,142 @@ function getRoleColor(role: string) {
   }
 }
 
-export default async function CompanyPage() {
-  const user = await getCurrentUser()
-  const company = await getCurrentCompany()
+export default function CompanyPage() {
+  const [user, setUser] = useState<any>(null)
+  const [company, setCompany] = useState<any>(null)
+  const [data, setData] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [editing, setEditing] = useState(false)
+  const [companyData, setCompanyData] = useState<any>({})
+  const { toast } = useToast()
+  const supabase = createClientComponentClient()
+
+  useEffect(() => {
+    loadData()
+  }, [])
+
+  const loadData = async () => {
+    try {
+      const { data: { user: currentUser } } = await supabase.auth.getUser()
+      if (currentUser) {
+        setUser(currentUser)
+        
+        // Get company data
+        const { data: companyData } = await supabase
+          .from('companies')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .single()
+        
+        if (companyData) {
+          setCompany(companyData)
+          setCompanyData(companyData)
+          
+          // Load additional company data
+          const companyId = companyData.id
+          
+          // Get team members
+          const { data: teamMembers } = await supabase
+            .from('profiles')
+            .select('id, full_name, email, role, last_sign_in_at, created_at')
+            .eq('company_id', companyId)
+            .order('created_at', { ascending: false })
+
+          // Get subscription
+          const { data: subscription } = await supabase
+            .from('subscriptions')
+            .select('*')
+            .eq('company_id', companyId)
+            .single()
+
+          // Get certifications
+          const { data: certifications } = await supabase
+            .from('certifications')
+            .select('*')
+            .eq('company_id', companyId)
+            .order('created_at', { ascending: false })
+
+          setData({
+            company: companyData,
+            teamMembers: teamMembers || [],
+            subscription: subscription || null,
+            certifications: certifications || []
+          })
+        }
+      }
+    } catch (error) {
+      console.error('Error loading data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const canManage = user?.role === 'company_owner' || user?.role === 'admin'
+
+  const handleInputChange = (field: string, value: any) => {
+    setCompanyData(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
+  const saveCompanyData = async () => {
+    try {
+      setSaving(true)
+      
+      const { error } = await supabase
+        .from('companies')
+        .update(companyData)
+        .eq('id', company.id)
+      
+      if (error) throw error
+      
+      toast({
+        title: 'Success',
+        description: 'Company information updated successfully',
+      })
+      
+      setEditing(false)
+      await loadData() // Reload data
+    } catch (error) {
+      console.error('Error saving company data:', error)
+      toast({
+        title: 'Error',
+        description: 'Failed to save company information',
+        variant: 'destructive',
+      })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    )
+  }
 
   if (!user || !company) {
     return null
   }
 
-  const data = await getCompanyData(company.id)
-  const canManage = user.role === 'company_owner' || user.role === 'admin'
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Company Profile</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Company Settings</h1>
           <p className="text-gray-600">
-            Manage your company information, team, and subscription.
+            Manage your company profile, team members, and subscription settings.
           </p>
         </div>
         {canManage && (
           <div className="flex gap-2">
-            <Link href="/company/settings">
-              <Button variant="outline">
-                <Settings className="h-4 w-4 mr-2" />
-                Settings
-              </Button>
-            </Link>
-            <Button>
+            <Button onClick={() => setEditing(!editing)}>
               <Edit className="h-4 w-4 mr-2" />
-              Edit Profile
+              {editing ? 'Cancel Edit' : 'Edit Profile'}
             </Button>
           </div>
         )}
@@ -183,8 +239,7 @@ export default async function CompanyPage() {
 
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="team">Team</TabsTrigger>
+          <TabsTrigger value="overview">Company Settings</TabsTrigger>
           <TabsTrigger value="certifications">Certifications</TabsTrigger>
           <TabsTrigger value="subscription">Subscription</TabsTrigger>
         </TabsList>
@@ -201,71 +256,220 @@ export default async function CompanyPage() {
                       Company Information
                     </CardTitle>
                     {canManage && (
-                      <Button variant="ghost" size="sm">
-                        <Edit className="h-4 w-4" />
-                      </Button>
+                      <div className="flex gap-2">
+                        {editing ? (
+                          <>
+                            <Button variant="outline" size="sm" onClick={() => setEditing(false)}>
+                              <X className="h-4 w-4" />
+                            </Button>
+                            <Button size="sm" onClick={saveCompanyData} disabled={saving}>
+                              {saving ? 'Saving...' : <><Save className="h-4 w-4" /> Save</>}
+                            </Button>
+                          </>
+                        ) : (
+                          <Button variant="ghost" size="sm" onClick={() => setEditing(true)}>
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
                     )}
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium text-muted-foreground">Company Name</label>
-                      <p className="mt-1 font-medium">{(data.company.name as string) || company.name || 'Not specified'}</p>
+                      <Label htmlFor="name">Company Name</Label>
+                      {editing ? (
+                        <Input
+                          id="name"
+                          value={companyData.name || ''}
+                          onChange={(e) => handleInputChange('name', e.target.value)}
+                          placeholder="Enter company name"
+                          className="mt-1"
+                        />
+                      ) : (
+                        <p className="mt-1 font-medium">{companyData.name || 'Not specified'}</p>
+                      )}
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-muted-foreground">Industry</label>
-                      <p className="mt-1">{(data.company.industry as string) || 'Not specified'}</p>
+                      <Label htmlFor="industry">Industry</Label>
+                      {editing ? (
+                        <Select value={companyData.industry || ''} onValueChange={(value) => handleInputChange('industry', value)}>
+                          <SelectTrigger className="mt-1">
+                            <SelectValue placeholder="Select industry" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Technology">Technology</SelectItem>
+                            <SelectItem value="Healthcare">Healthcare</SelectItem>
+                            <SelectItem value="Finance">Finance</SelectItem>
+                            <SelectItem value="Education">Education</SelectItem>
+                            <SelectItem value="Government">Government</SelectItem>
+                            <SelectItem value="Manufacturing">Manufacturing</SelectItem>
+                            <SelectItem value="Construction">Construction</SelectItem>
+                            <SelectItem value="Professional Services">Professional Services</SelectItem>
+                            <SelectItem value="Consulting">Consulting</SelectItem>
+                            <SelectItem value="Research & Development">Research & Development</SelectItem>
+                            <SelectItem value="Other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <p className="mt-1">{companyData.industry || 'Not specified'}</p>
+                      )}
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-muted-foreground">Business Type</label>
-                      <p className="mt-1">{(data.company.business_type as string) || 'Not specified'}</p>
+                      <Label htmlFor="businessType">Business Type</Label>
+                      {editing ? (
+                        <Select value={companyData.business_type || ''} onValueChange={(value) => handleInputChange('business_type', value)}>
+                          <SelectTrigger className="mt-1">
+                            <SelectValue placeholder="Select type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Small Business">Small Business</SelectItem>
+                            <SelectItem value="Large Business">Large Business</SelectItem>
+                            <SelectItem value="Nonprofit">Nonprofit</SelectItem>
+                            <SelectItem value="Educational Institution">Educational Institution</SelectItem>
+                            <SelectItem value="Government Entity">Government Entity</SelectItem>
+                            <SelectItem value="Other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <p className="mt-1">{companyData.business_type || 'Not specified'}</p>
+                      )}
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-muted-foreground">Company Size</label>
-                      <p className="mt-1">{(data.company.company_size as string) || 'Not specified'}</p>
+                      <Label htmlFor="companySize">Company Size</Label>
+                      {editing ? (
+                        <Select value={companyData.company_size || ''} onValueChange={(value) => handleInputChange('company_size', value)}>
+                          <SelectTrigger className="mt-1">
+                            <SelectValue placeholder="Select size" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="1-10 employees">1-10 employees</SelectItem>
+                            <SelectItem value="11-50 employees">11-50 employees</SelectItem>
+                            <SelectItem value="51-200 employees">51-200 employees</SelectItem>
+                            <SelectItem value="201-500 employees">201-500 employees</SelectItem>
+                            <SelectItem value="501-1000 employees">501-1000 employees</SelectItem>
+                            <SelectItem value="1000+ employees">1000+ employees</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <p className="mt-1">{companyData.company_size || 'Not specified'}</p>
+                      )}
                     </div>
                   </div>
                   
-                  {(data.company.description as string) && (
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">Description</label>
-                      <p className="mt-1 text-sm leading-relaxed">{data.company.description as string}</p>
-                    </div>
-                  )}
+                  <div>
+                    <Label htmlFor="description">Description</Label>
+                    {editing ? (
+                      <Textarea
+                        id="description"
+                        value={companyData.description || ''}
+                        onChange={(e) => handleInputChange('description', e.target.value)}
+                        placeholder="Brief description of your company..."
+                        className="mt-1 min-h-24"
+                      />
+                    ) : (
+                      <p className="mt-1 text-sm leading-relaxed">{companyData.description || 'No description provided'}</p>
+                    )}
+                  </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {(data.company.website as string) && (
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Website</label>
+                    <div>
+                      <Label htmlFor="website">Website</Label>
+                      {editing ? (
+                        <Input
+                          id="website"
+                          value={companyData.website || ''}
+                          onChange={(e) => handleInputChange('website', e.target.value)}
+                          placeholder="https://example.com"
+                          className="mt-1"
+                        />
+                      ) : (
                         <div className="mt-1 flex items-center gap-2">
                           <Globe className="h-4 w-4 text-muted-foreground" />
-                          <a href={data.company.website as string} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                            {data.company.website as string}
-                          </a>
+                          {companyData.website ? (
+                            <a href={companyData.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                              {companyData.website}
+                            </a>
+                          ) : (
+                            <span className="text-muted-foreground">Not specified</span>
+                          )}
                         </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
                     
-                    {(data.company.headquarters_address as string) && (
-                      <div>
-                        <label className="text-sm font-medium text-muted-foreground">Headquarters</label>
+                    <div>
+                      <Label htmlFor="headquarters">Headquarters</Label>
+                      {editing ? (
+                        <Input
+                          id="headquarters"
+                          value={companyData.headquarters_address || ''}
+                          onChange={(e) => handleInputChange('headquarters_address', e.target.value)}
+                          placeholder="City, State"
+                          className="mt-1"
+                        />
+                      ) : (
                         <div className="mt-1 flex items-center gap-2">
                           <MapPin className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm">
-                            {typeof data.company.headquarters_address === 'string' 
-                              ? data.company.headquarters_address 
-                              : JSON.stringify(data.company.headquarters_address)}
-                          </span>
+                          <span className="text-sm">{companyData.headquarters_address || 'Not specified'}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Team Members */}
+              <Card>
+                <CardHeader>
+                  <div className="flex justify-between items-center">
+                    <CardTitle className="flex items-center gap-2">
+                      <Users className="h-5 w-5" />
+                      Team Members
+                    </CardTitle>
+                    {canManage && (
+                      <Link href="/company/team">
+                        <Button variant="ghost" size="sm">
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="divide-y">
+                    {data?.teamMembers?.map((member: TeamMember) => (
+                      <div key={member.id} className="p-4 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                            <User className="h-5 w-5 text-gray-500" />
+                          </div>
+                          <div>
+                            <p className="font-medium">{member.full_name}</p>
+                            <p className="text-sm text-muted-foreground">{member.email}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Badge className={getRoleColor(member.role)}>
+                            {member.role.replace('_', ' ').toUpperCase()}
+                          </Badge>
+                          <div className="text-right">
+                            <p className="text-sm text-muted-foreground">
+                              Last active: {member.last_sign_in_at ? formatDate(member.last_sign_in_at) : 'Never'}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              Joined: {formatDate(member.created_at)}
+                            </p>
+                          </div>
                         </div>
                       </div>
-                    )}
+                    ))}
                   </div>
                 </CardContent>
               </Card>
 
               {/* Capabilities */}
-              {(data.company.capabilities as string[])?.length > 0 && (
+              {(companyData.capabilities as string[])?.length > 0 && (
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
@@ -275,7 +479,7 @@ export default async function CompanyPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2">
-                      {(data.company.capabilities as string[])?.map((capability: string, index: number) => (
+                      {(companyData.capabilities as string[])?.map((capability: string, index: number) => (
                         <Badge key={index} variant="secondary">
                           {capability}
                         </Badge>
@@ -286,14 +490,14 @@ export default async function CompanyPage() {
               )}
 
               {/* Target Jurisdictions */}
-              {(data.company.target_jurisdictions as string[])?.length > 0 && (
+              {(companyData.target_jurisdictions as string[])?.length > 0 && (
                 <Card>
                   <CardHeader>
                     <CardTitle>Target Jurisdictions</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2">
-                      {(data.company.target_jurisdictions as string[])?.map((jurisdiction: string, index: number) => (
+                      {(companyData.target_jurisdictions as string[])?.map((jurisdiction: string, index: number) => (
                         <Badge key={index} variant="outline">
                           {jurisdiction}
                         </Badge>
@@ -314,21 +518,21 @@ export default async function CompanyPage() {
                 <CardContent className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Team Members</span>
-                    <span className="font-medium">{data.teamMembers.length}</span>
+                    <span className="font-medium">{data?.teamMembers?.length || 0}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Certifications</span>
-                    <span className="font-medium">{data.certifications.length}</span>
+                    <span className="font-medium">{data?.certifications?.length || 0}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Member Since</span>
-                    <span className="font-medium">{data.company.created_at ? formatDate(data.company.created_at as string) : 'N/A'}</span>
+                    <span className="font-medium">{companyData.created_at ? formatDate(companyData.created_at) : 'N/A'}</span>
                   </div>
                 </CardContent>
               </Card>
 
               {/* Subscription Status */}
-              {data.subscription ? (
+              {data?.subscription ? (
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
@@ -392,58 +596,25 @@ export default async function CompanyPage() {
                   </CardContent>
                 </Card>
               )}
+
+              {/* Quick Actions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {canManage && (
+                    <Link href="/company/team" className="w-full">
+                      <Button variant="outline" size="sm" className="w-full justify-start">
+                        <Users className="h-4 w-4 mr-2" />
+                        Manage Team
+                      </Button>
+                    </Link>
+                  )}
+                </CardContent>
+              </Card>
             </div>
           </div>
-        </TabsContent>
-
-        <TabsContent value="team" className="space-y-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h3 className="text-lg font-semibold">Team Members</h3>
-              <p className="text-sm text-muted-foreground">Manage your team and their permissions</p>
-            </div>
-            {canManage && (
-              <Link href="/company/team">
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Invite Member
-                </Button>
-              </Link>
-            )}
-          </div>
-
-          <Card>
-            <CardContent className="p-0">
-              <div className="divide-y">
-                {data.teamMembers.map((member: TeamMember) => (
-                  <div key={member.id} className="p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                        <User className="h-5 w-5 text-gray-500" />
-                      </div>
-                      <div>
-                        <p className="font-medium">{member.full_name}</p>
-                        <p className="text-sm text-muted-foreground">{member.email}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Badge className={getRoleColor(member.role)}>
-                        {member.role.replace('_', ' ').toUpperCase()}
-                      </Badge>
-                      <div className="text-right">
-                        <p className="text-sm text-muted-foreground">
-                          Last active: {member.last_sign_in_at ? formatDate(member.last_sign_in_at) : 'Never'}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          Joined: {formatDate(member.created_at)}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
         </TabsContent>
 
         <TabsContent value="certifications" className="space-y-6">
@@ -462,7 +633,7 @@ export default async function CompanyPage() {
             )}
           </div>
 
-          {data.certifications.length === 0 ? (
+          {data?.certifications?.length === 0 ? (
             <Card>
               <CardContent className="p-12 text-center">
                 <Award className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -482,7 +653,7 @@ export default async function CompanyPage() {
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {data.certifications.map((cert: Certification) => (
+              {data?.certifications?.map((cert: Certification) => (
                 <Card key={cert.id}>
                   <CardHeader>
                     <div className="flex justify-between items-start">
@@ -533,7 +704,7 @@ export default async function CompanyPage() {
             )}
           </div>
 
-          {data.subscription ? (
+          {data?.subscription ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>

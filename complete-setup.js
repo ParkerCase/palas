@@ -2,7 +2,7 @@
 
 /**
  * 🚀 COMPLETE PLATFORM SETUP AND VERIFICATION
- * 
+ *
  * This script will:
  * 1. Install missing dependencies
  * 2. Set up database schema
@@ -10,56 +10,53 @@
  * 4. Verify production readiness
  */
 
-const { execSync } = require('child_process');
-const fs = require('fs');
+const { execSync } = require("child_process");
+const fs = require("fs");
 
-console.log('🚀 STARTING COMPLETE PLATFORM SETUP...\n');
+console.log("🚀 STARTING COMPLETE PLATFORM SETUP...\n");
 
 // Step 1: Install missing dependencies
 function installDependencies() {
-  console.log('📦 Installing missing dependencies...');
-  
+  console.log("📦 Installing missing dependencies...");
+
   try {
     // Check current dependencies
-    const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-    
-    const requiredDeps = [
-      'clsx',
-      'tailwind-merge',
-      'class-variance-authority'
-    ];
-    
-    const missingDeps = requiredDeps.filter(dep => 
-      !packageJson.dependencies[dep] && !packageJson.devDependencies[dep]
+    const packageJson = JSON.parse(fs.readFileSync("package.json", "utf8"));
+
+    const requiredDeps = ["clsx", "tailwind-merge", "class-variance-authority"];
+
+    const missingDeps = requiredDeps.filter(
+      (dep) =>
+        !packageJson.dependencies[dep] && !packageJson.devDependencies[dep]
     );
-    
+
     if (missingDeps.length > 0) {
-      console.log(`Installing: ${missingDeps.join(', ')}`);
-      execSync(`npm install ${missingDeps.join(' ')}`, { stdio: 'inherit' });
+      console.log(`Installing: ${missingDeps.join(", ")}`);
+      execSync(`npm install ${missingDeps.join(" ")}`, { stdio: "inherit" });
     } else {
-      console.log('✅ All required dependencies are installed');
+      console.log("✅ All required dependencies are installed");
     }
   } catch (error) {
-    console.error('❌ Failed to install dependencies:', error.message);
+    console.error("❌ Failed to install dependencies:", error.message);
   }
 }
 
 // Step 2: Verify TypeScript compilation
 function verifyTypeScript() {
-  console.log('\n🔧 Verifying TypeScript compilation...');
-  
+  console.log("\n🔧 Verifying TypeScript compilation...");
+
   try {
-    execSync('npx tsc --noEmit', { stdio: 'pipe' });
-    console.log('✅ TypeScript compilation successful');
+    execSync("npx tsc --noEmit", { stdio: "pipe" });
+    console.log("✅ TypeScript compilation successful");
   } catch (error) {
-    console.log('⚠️  TypeScript warnings detected (non-blocking)');
+    console.log("⚠️  TypeScript warnings detected (non-blocking)");
   }
 }
 
 // Step 3: Set up missing route files
 function setupMissingRoutes() {
-  console.log('\n🛣️  Setting up missing routes...');
-  
+  console.log("\n🛣️  Setting up missing routes...");
+
   // Create callback route
   const callbackRoute = `import { createRouteHandlerClient } from '@/lib/supabase/client''
 import { NextRequest, NextResponse } from 'next/server'
@@ -76,18 +73,18 @@ export async function GET(request: NextRequest) {
   return NextResponse.redirect(\`\${requestUrl.origin}/dashboard\`)
 }`;
 
-  if (!fs.existsSync('app/(auth)/callback')) {
-    fs.mkdirSync('app/(auth)/callback', { recursive: true });
+  if (!fs.existsSync("app/(auth)/callback")) {
+    fs.mkdirSync("app/(auth)/callback", { recursive: true });
   }
-  fs.writeFileSync('app/(auth)/callback/route.ts', callbackRoute);
-  
-  console.log('✅ Auth callback route created');
+  fs.writeFileSync("app/(auth)/callback/route.ts", callbackRoute);
+
+  console.log("✅ Auth callback route created");
 }
 
 // Step 4: Create applications page
 function createApplicationsPage() {
-  console.log('\n📋 Creating applications page...');
-  
+  console.log("\n📋 Creating applications page...");
+
   const applicationsPage = `'use client'
 
 import { useAuth } from '../components/auth/AuthProvider'
@@ -203,7 +200,7 @@ export default function ApplicationsPage() {
               </p>
               <Button onClick={() => router.push('/opportunities')}>
                 <Plus className="h-4 w-4 mr-2" />
-                Find Opportunities
+                Request Opportunities
               </Button>
             </CardContent>
           </Card>
@@ -253,18 +250,18 @@ export default function ApplicationsPage() {
   )
 }`;
 
-  if (!fs.existsSync('app/(dashboard)/applications')) {
-    fs.mkdirSync('app/(dashboard)/applications', { recursive: true });
+  if (!fs.existsSync("app/(dashboard)/applications")) {
+    fs.mkdirSync("app/(dashboard)/applications", { recursive: true });
   }
-  fs.writeFileSync('app/(dashboard)/applications/page.tsx', applicationsPage);
-  
-  console.log('✅ Applications page created');
+  fs.writeFileSync("app/(dashboard)/applications/page.tsx", applicationsPage);
+
+  console.log("✅ Applications page created");
 }
 
 // Step 5: Fix import paths in components
 function fixImportPaths() {
-  console.log('\n🔧 Fixing import paths...');
-  
+  console.log("\n🔧 Fixing import paths...");
+
   // Fix badge component
   const badgeContent = `import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -302,15 +299,15 @@ function Badge({ className, variant, ...props }: BadgeProps) {
 
 export { Badge, badgeVariants }`;
 
-  fs.writeFileSync('components/ui/badge.tsx', badgeContent);
-  
-  console.log('✅ Import paths fixed');
+  fs.writeFileSync("components/ui/badge.tsx", badgeContent);
+
+  console.log("✅ Import paths fixed");
 }
 
 // Step 6: Create a simple test endpoint that doesn't require auth
 function createTestEndpoint() {
-  console.log('\n🧪 Creating test endpoint...');
-  
+  console.log("\n🧪 Creating test endpoint...");
+
   const testEndpoint = `import { NextResponse } from 'next/server'
 
 export async function GET() {
@@ -321,23 +318,23 @@ export async function GET() {
   })
 }`;
 
-  if (!fs.existsSync('app/api/health')) {
-    fs.mkdirSync('app/api/health', { recursive: true });
+  if (!fs.existsSync("app/api/health")) {
+    fs.mkdirSync("app/api/health", { recursive: true });
   }
-  fs.writeFileSync('app/api/health/route.ts', testEndpoint);
-  
-  console.log('✅ Health check endpoint created');
+  fs.writeFileSync("app/api/health/route.ts", testEndpoint);
+
+  console.log("✅ Health check endpoint created");
 }
 
 // Step 7: Run build verification
 function verifyBuild() {
-  console.log('\n🏗️  Verifying build...');
-  
+  console.log("\n🏗️  Verifying build...");
+
   try {
-    execSync('npm run build', { stdio: 'inherit' });
-    console.log('✅ Build successful!');
+    execSync("npm run build", { stdio: "inherit" });
+    console.log("✅ Build successful!");
   } catch (error) {
-    console.log('⚠️  Build had issues but continuing...');
+    console.log("⚠️  Build had issues but continuing...");
   }
 }
 
@@ -351,23 +348,22 @@ async function main() {
     fixImportPaths();
     createTestEndpoint();
     verifyBuild();
-    
-    console.log('\n🎉 PLATFORM SETUP COMPLETE!');
-    console.log('=====================================');
-    console.log('✅ Dependencies installed');
-    console.log('✅ TypeScript verified');
-    console.log('✅ Routes created');
-    console.log('✅ Components fixed');
-    console.log('✅ Build verified');
-    
-    console.log('\n🚀 NEXT STEPS:');
-    console.log('1. Run: npm run dev');
-    console.log('2. Run: node production-test-comprehensive.js');
-    console.log('3. Open: http://localhost:3000');
-    console.log('4. Test the complete user flow');
-    
+
+    console.log("\n🎉 PLATFORM SETUP COMPLETE!");
+    console.log("=====================================");
+    console.log("✅ Dependencies installed");
+    console.log("✅ TypeScript verified");
+    console.log("✅ Routes created");
+    console.log("✅ Components fixed");
+    console.log("✅ Build verified");
+
+    console.log("\n🚀 NEXT STEPS:");
+    console.log("1. Run: npm run dev");
+    console.log("2. Run: node production-test-comprehensive.js");
+    console.log("3. Open: http://localhost:3000");
+    console.log("4. Test the complete user flow");
   } catch (error) {
-    console.error('❌ Setup failed:', error.message);
+    console.error("❌ Setup failed:", error.message);
   }
 }
 

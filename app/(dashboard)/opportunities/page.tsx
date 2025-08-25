@@ -119,7 +119,7 @@ export default function OpportunitiesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
-              <h1 className="text-2xl font-bold text-gray-900">Find Opportunities</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Request Opportunities</h1>
             </div>
             <div className="flex items-center space-x-4">
               <Button variant="ghost" onClick={() => router.push('/dashboard')}>
@@ -206,7 +206,7 @@ export default function OpportunitiesPage() {
                     <div className="flex flex-col space-y-2">
                       <Button onClick={() => router.push(`/opportunities/${opportunity.id}/apply`)}>
                         <Star className="h-4 w-4 mr-2" />
-                        Apply with AI
+                        Apply Now
                       </Button>
                       <Button variant="outline" onClick={() => router.push(`/opportunities/${opportunity.id}`)}>
                         View Details

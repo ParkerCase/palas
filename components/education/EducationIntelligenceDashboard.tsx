@@ -925,42 +925,42 @@ export default function EducationIntelligenceDashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <Button
                     variant="outline"
-                    className="h-auto p-4 flex-col gap-2"
-                    onClick={() => router.push('/healthcare')}
+                    className="h-auto p-4 flex-col gap-2 opacity-50 cursor-not-allowed"
+                    disabled
                   >
-                    <Heart className="h-6 w-6 text-red-600" />
-                    <span className="font-medium">Healthcare</span>
-                    <span className="text-xs text-muted-foreground">6K+ providers, $4T market</span>
+                    <Heart className="h-6 w-6 text-gray-400" />
+                    <span className="font-medium text-gray-400">Healthcare</span>
+                    <span className="text-xs text-gray-400">Coming Soon</span>
                   </Button>
                   
                   <Button
                     variant="outline"
-                    className="h-auto p-4 flex-col gap-2"
-                    onClick={() => router.push('/construction')}
+                    className="h-auto p-4 flex-col gap-2 opacity-50 cursor-not-allowed"
+                    disabled
                   >
-                    <HardHat className="h-6 w-6 text-orange-600" />
-                    <span className="font-medium">Construction</span>
-                    <span className="text-xs text-muted-foreground">750K+ contractors, $1.8T market</span>
+                    <HardHat className="h-6 w-6 text-gray-400" />
+                    <span className="font-medium text-gray-400">Construction</span>
+                    <span className="text-xs text-gray-400">Coming Soon</span>
                   </Button>
                   
                   <Button
                     variant="outline"
-                    className="h-auto p-4 flex-col gap-2"
-                    onClick={() => router.push('/government')}
+                    className="h-auto p-4 flex-col gap-2 opacity-50 cursor-not-allowed"
+                    disabled
                   >
-                    <Building2 className="h-6 w-6 text-blue-600" />
-                    <span className="font-medium">Government</span>
-                    <span className="text-xs text-muted-foreground">90K+ agencies, $6T budget</span>
+                    <Building2 className="h-6 w-6 text-gray-400" />
+                    <span className="font-medium text-gray-400">Government</span>
+                    <span className="text-xs text-gray-400">Coming Soon</span>
                   </Button>
                   
                   <Button
                     variant="outline"
-                    className="h-auto p-4 flex-col gap-2"
-                    onClick={() => router.push('/manufacturing')}
+                    className="h-auto p-4 flex-col gap-2 opacity-50 cursor-not-allowed"
+                    disabled
                   >
-                    <Factory className="h-6 w-6 text-green-600" />
-                    <span className="font-medium">Manufacturing</span>
-                    <span className="text-xs text-muted-foreground">250K+ companies, $2.4T output</span>
+                    <Factory className="h-6 w-6 text-gray-400" />
+                    <span className="font-medium text-gray-400">Manufacturing</span>
+                    <span className="text-xs text-gray-400">Coming Soon</span>
                   </Button>
                 </div>
               </div>

@@ -11,7 +11,7 @@ import {
   Search, Plus, Bell, Settings, TrendingUp, 
   FileText, Clock, CheckCircle, AlertCircle,
   DollarSign, Building, Calendar, Users,
-  Bot, Star, Award
+  Bot, Star, Award, Crown
 } from 'lucide-react'
 
 interface DashboardData {
@@ -206,55 +206,49 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <h1 className="text-2xl font-bold text-gray-900">GovContractAI</h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <button className="relative p-2 text-gray-600 hover:text-gray-900">
-                <Bell className="h-6 w-6" />
-                {(dashboardData?.notifications?.filter(n => !n.read) || []).length > 0 && (
-                  <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                    {(dashboardData?.notifications?.filter(n => !n.read) || []).length}
-                  </span>
-                )}
-              </button>
-              <button className="p-2 text-gray-600 hover:text-gray-900">
-                <Settings className="h-6 w-6" />
-              </button>
-              <div className="h-8 w-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-medium">
-                U
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+     
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}
         <div className="mb-8">
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-6 text-white">
-            <h2 className="text-2xl font-bold mb-2">Welcome back!</h2>
-            <p className="text-blue-100 mb-4">Find and apply to government opportunities with AI assistance</p>
-            <div className="flex space-x-4">
-              <Button 
-                className="bg-white text-blue-600 hover:bg-gray-100"
-                onClick={() => router.push('/opportunities')}
-              >
-                <Search className="h-4 w-4 mr-2" />
-                Find Opportunities
-              </Button>
-              <Button 
-                variant="outline" 
-                className="border-white text-white hover:bg-white hover:text-blue-600"
-                onClick={() => router.push('/applications')}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                New Application
-              </Button>
+            <div className="flex justify-between items-start">
+              <div>
+                <h2 className="text-2xl font-bold mb-2">Welcome back!</h2>
+                <p className="text-blue-100 mb-4">Find and apply to government opportunities with AI assistance</p>
+                <div className="flex space-x-4">
+                  <Button 
+                    className="bg-white text-blue-600 hover:bg-gray-100"
+                    onClick={() => router.push('/opportunities')}
+                  >
+                    <Search className="h-4 w-4 mr-2" />
+                    Request Opportunities
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="border-white text-white hover:bg-white hover:text-blue-600"
+                    onClick={() => router.push('/applications')}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    New Application
+                  </Button>
+                </div>
+              </div>
+              {/* Executive Access Link - Only visible to authorized users */}
+              {user?.email && ['parker@parkercase.co', 'parker@parkercase.com'].includes(user.email.toLowerCase()) && (
+                <div className="text-right">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => router.push('/exec-only')}
+                    className="text-white hover:bg-white/20 transition-colors"
+                  >
+                    <Crown className="h-4 w-4 mr-2" />
+                    Executive Access
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -49,7 +49,7 @@ export default function RecentOpportunities({ opportunities }: RecentOpportuniti
               <Star className="h-8 w-8 text-gray-400" />
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">No opportunities matched yet</h3>
-            <p className="text-gray-500 text-sm">AI will find opportunities that match your company profile</p>
+            <p className="text-gray-500 text-sm">AI will Request Opportunities that match your company profile</p>
             <Link href="/opportunities" className="mt-4 inline-block">
               <Button>Browse Opportunities</Button>
             </Link>
