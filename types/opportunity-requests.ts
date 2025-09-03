@@ -56,7 +56,7 @@ export interface IndustryCode {
 
 export interface BudgetRange {
   min: number
-  max: number
+  max: number | null
   label: string
 }
 

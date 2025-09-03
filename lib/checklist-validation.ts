@@ -126,12 +126,12 @@ export function getCriticalItems(checklist: CompanyChecklist): string[] {
     'legal_business_name_dba',
     'duns_uei_number',
     'naics_unspsc_codes'
-  ]
+  ] as const
 
   const missingCriticalItems: string[] = []
   
   criticalItemFields.forEach(field => {
-    if (!checklist[field]) {
+    if (!checklist[field as keyof CompanyChecklist]) {
       const item = CHECKLIST_ITEMS.find(item => item.field === field)
       if (item) {
         missingCriticalItems.push(item.label)
@@ -159,7 +159,7 @@ export function getChecklistSummary(checklist: CompanyChecklist): {
   const byJurisdiction: { [key: string]: number } = {}
 
   CHECKLIST_ITEMS.forEach(item => {
-    if (checklist[item.field]) {
+    if (checklist[item.field as keyof CompanyChecklist]) {
       completedItems++
       byJurisdiction[item.category] = (byJurisdiction[item.category] || 0) + 1
     }

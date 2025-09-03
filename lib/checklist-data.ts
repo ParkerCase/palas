@@ -77,28 +77,32 @@ export const CHECKLIST_ITEMS: ChecklistItem[] = [
     label: 'Financial Statements (2–3 years)',
     category: 'State',
     description: 'Audited financial statements for the past 2-3 years',
-    field: 'financial_statements_state'
+    field: 'financial_statements_state',
+    inputType: 'boolean'
   },
   {
     id: 'references_past_performance_state',
     label: 'References / Past Performance',
     category: 'State',
     description: 'Client references and past performance documentation',
-    field: 'references_past_performance_state'
+    field: 'references_past_performance_state',
+    inputType: 'boolean'
   },
   {
     id: 'capability_statement_state',
     label: 'Capability Statement',
     category: 'State',
     description: 'Company capability statement and qualifications',
-    field: 'capability_statement_state'
+    field: 'capability_statement_state',
+    inputType: 'boolean'
   },
   {
     id: 'resumes_key_staff_state',
     label: 'Resumes of Key Staff',
     category: 'State',
     description: 'Resumes and qualifications of key personnel',
-    field: 'resumes_key_staff_state'
+    field: 'resumes_key_staff_state',
+    inputType: 'boolean'
   },
   {
     id: 'certifications_sb_dvbe_dbe_state',
@@ -141,35 +145,40 @@ export const CHECKLIST_ITEMS: ChecklistItem[] = [
     label: 'Payee Data Record (STD 204)',
     category: 'State',
     description: 'California Payee Data Record form',
-    field: 'payee_data_record_std_204'
+    field: 'payee_data_record_std_204',
+    inputType: 'boolean'
   },
   {
     id: 'darfur_contracting_act_certification_std_843',
     label: 'Darfur Contracting Act Certification (STD 843)',
     category: 'State',
     description: 'Certification regarding Sudan and Darfur contracting',
-    field: 'darfur_contracting_act_certification_std_843'
+    field: 'darfur_contracting_act_certification_std_843',
+    inputType: 'boolean'
   },
   {
     id: 'contractor_certification_clauses_ccc_04',
     label: 'Contractor Certification Clauses (CCC-04 or latest)',
     category: 'State',
     description: 'Contractor certification clauses compliance',
-    field: 'contractor_certification_clauses_ccc_04'
+    field: 'contractor_certification_clauses_ccc_04',
+    inputType: 'boolean'
   },
   {
     id: 'bidder_declaration_form_gspd_05_105',
     label: 'Bidder Declaration Form (GSPD-05-105)',
     category: 'State',
     description: 'General Services bidder declaration form',
-    field: 'bidder_declaration_form_gspd_05_105'
+    field: 'bidder_declaration_form_gspd_05_105',
+    inputType: 'boolean'
   },
   {
     id: 'civil_rights_compliance_certification',
     label: 'Civil Rights Compliance Certification',
     category: 'State',
     description: 'Civil rights compliance certification',
-    field: 'civil_rights_compliance_certification'
+    field: 'civil_rights_compliance_certification',
+    inputType: 'boolean'
   },
 
   // County Requirements
@@ -178,119 +187,136 @@ export const CHECKLIST_ITEMS: ChecklistItem[] = [
     label: 'Business License',
     category: 'County',
     description: 'County business license registration',
-    field: 'business_license_county'
+    field: 'business_license_county',
+    inputType: 'boolean'
   },
   {
     id: 'secretary_of_state_registration_county',
     label: 'Secretary of State Registration',
     category: 'County',
     description: 'County business registration',
-    field: 'secretary_of_state_registration_county'
+    field: 'secretary_of_state_registration_county',
+    inputType: 'boolean'
   },
   {
     id: 'federal_ein_county',
     label: 'Federal EIN (Tax ID)',
     category: 'County',
     description: 'Federal Employer Identification Number',
-    field: 'federal_ein_county'
+    field: 'federal_ein_county',
+    inputType: 'boolean'
   },
   {
     id: 'ca_sellers_permit_county',
     label: 'CA Seller\'s Permit (if applicable)',
     category: 'County',
     description: 'California Seller\'s Permit for sales tax collection',
-    field: 'ca_sellers_permit_county'
+    field: 'ca_sellers_permit_county',
+    inputType: 'boolean'
   },
   {
     id: 'insurance_certificates_county',
     label: 'Insurance Certificates',
     category: 'County',
     description: 'General liability and other required insurance certificates',
-    field: 'insurance_certificates_county'
+    field: 'insurance_certificates_county',
+    inputType: 'boolean'
   },
   {
     id: 'financial_statements_county',
     label: 'Financial Statements (2–3 years)',
     category: 'County',
     description: 'Audited financial statements for the past 2-3 years',
-    field: 'financial_statements_county'
+    field: 'financial_statements_county',
+    inputType: 'boolean'
   },
   {
     id: 'references_past_performance_county',
     label: 'References / Past Performance',
     category: 'County',
     description: 'Client references and past performance documentation',
-    field: 'references_past_performance_county'
+    field: 'references_past_performance_county',
+    inputType: 'boolean'
   },
   {
     id: 'capability_statement_county',
     label: 'Capability Statement',
     category: 'County',
     description: 'Company capability statement and qualifications',
-    field: 'capability_statement_county'
+    field: 'capability_statement_county',
+    inputType: 'boolean'
   },
   {
     id: 'resumes_key_staff_county',
     label: 'Resumes of Key Staff',
     category: 'County',
     description: 'Resumes and qualifications of key personnel',
-    field: 'resumes_key_staff_county'
+    field: 'resumes_key_staff_county',
+    inputType: 'boolean'
   },
   {
     id: 'certifications_sb_dvbe_dbe_county',
     label: 'Certifications (SB, DVBE, DBE, etc.)',
     category: 'County',
     description: 'Small Business, Disabled Veteran, Disadvantaged Business certifications',
-    field: 'certifications_sb_dvbe_dbe_county'
+    field: 'certifications_sb_dvbe_dbe_county',
+    inputType: 'boolean'
   },
   {
     id: 'county_vendor_registration',
     label: 'County Vendor Registration',
     category: 'County',
     description: 'County vendor registration system enrollment',
-    field: 'county_vendor_registration'
+    field: 'county_vendor_registration',
+    inputType: 'boolean'
   },
   {
     id: 'w9_county_payee_form',
     label: 'W-9 or County Payee Form',
     category: 'County',
     description: 'W-9 form or county-specific payee information form',
-    field: 'w9_county_payee_form'
+    field: 'w9_county_payee_form',
+    inputType: 'boolean'
   },
   {
     id: 'insurance_certificates_naming_county',
     label: 'Insurance Certificates (naming county)',
     category: 'County',
     description: 'Insurance certificates with county as additional insured',
-    field: 'insurance_certificates_naming_county'
+    field: 'insurance_certificates_naming_county',
+    inputType: 'boolean'
   },
   {
     id: 'debarment_suspension_certification_county',
     label: 'Debarment / Suspension Certification',
     category: 'County',
     description: 'Certification of no debarment or suspension',
-    field: 'debarment_suspension_certification_county'
+    field: 'debarment_suspension_certification_county',
+    inputType: 'boolean'
   },
   {
     id: 'conflict_of_interest_statement_county',
     label: 'Conflict of Interest Statement',
     category: 'County',
     description: 'Conflict of interest disclosure statement',
-    field: 'conflict_of_interest_statement_county'
+    field: 'conflict_of_interest_statement_county',
+    inputType: 'boolean'
   },
   {
     id: 'non_collusion_declaration_county',
     label: 'Non-Collusion Declaration',
     category: 'County',
     description: 'Declaration of no collusion in bidding',
-    field: 'non_collusion_declaration_county'
+    field: 'non_collusion_declaration_county',
+    inputType: 'boolean'
   },
   {
     id: 'technical_proposal_pricing_sheet_county',
     label: 'Technical Proposal / Pricing Sheet',
     category: 'County',
     description: 'Technical proposal and pricing documentation',
-    field: 'technical_proposal_pricing_sheet_county'
+    field: 'technical_proposal_pricing_sheet_county',
+    inputType: 'boolean'
   },
 
   // City Requirements
@@ -299,133 +325,152 @@ export const CHECKLIST_ITEMS: ChecklistItem[] = [
     label: 'Business License',
     category: 'City',
     description: 'City business license registration',
-    field: 'business_license_city'
+    field: 'business_license_city',
+    inputType: 'boolean'
   },
   {
     id: 'secretary_of_state_registration_city',
     label: 'Secretary of State Registration',
     category: 'City',
     description: 'City business registration',
-    field: 'secretary_of_state_registration_city'
+    field: 'secretary_of_state_registration_city',
+    inputType: 'boolean'
   },
   {
     id: 'federal_ein_city',
     label: 'Federal EIN (Tax ID)',
     category: 'City',
     description: 'Federal Employer Identification Number',
-    field: 'federal_ein_city'
+    field: 'federal_ein_city',
+    inputType: 'boolean'
   },
   {
     id: 'ca_sellers_permit_city',
     label: 'CA Seller\'s Permit (if applicable)',
     category: 'City',
     description: 'California Seller\'s Permit for sales tax collection',
-    field: 'ca_sellers_permit_city'
+    field: 'ca_sellers_permit_city',
+    inputType: 'boolean'
   },
   {
     id: 'insurance_certificates_city',
     label: 'Insurance Certificates',
     category: 'City',
     description: 'General liability and other required insurance certificates',
-    field: 'insurance_certificates_city'
+    field: 'insurance_certificates_city',
+    inputType: 'boolean'
   },
   {
     id: 'financial_statements_city',
     label: 'Financial Statements (2–3 years)',
     category: 'City',
     description: 'Audited financial statements for the past 2-3 years',
-    field: 'financial_statements_city'
+    field: 'financial_statements_city',
+    inputType: 'boolean'
   },
   {
     id: 'references_past_performance_city',
     label: 'References / Past Performance',
     category: 'City',
     description: 'Client references and past performance documentation',
-    field: 'references_past_performance_city'
+    field: 'references_past_performance_city',
+    inputType: 'boolean'
   },
   {
     id: 'capability_statement_city',
     label: 'Capability Statement',
     category: 'City',
     description: 'Company capability statement and qualifications',
-    field: 'capability_statement_city'
+    field: 'capability_statement_city',
+    inputType: 'boolean'
   },
   {
     id: 'resumes_key_staff_city',
     label: 'Resumes of Key Staff',
     category: 'City',
     description: 'Resumes and qualifications of key personnel',
-    field: 'resumes_key_staff_city'
+    field: 'resumes_key_staff_city',
+    inputType: 'boolean'
   },
   {
     id: 'certifications_sb_dvbe_dbe_city',
     label: 'Certifications (SB, DVBE, DBE, etc.)',
     category: 'City',
     description: 'Small Business, Disabled Veteran, Disadvantaged Business certifications',
-    field: 'certifications_sb_dvbe_dbe_city'
+    field: 'certifications_sb_dvbe_dbe_city',
+    inputType: 'boolean'
   },
   {
     id: 'city_vendor_registration',
     label: 'City Vendor Registration',
     category: 'City',
     description: 'City vendor registration system enrollment',
-    field: 'city_vendor_registration'
+    field: 'city_vendor_registration',
+    inputType: 'boolean'
   },
   {
     id: 'w9_form_city',
     label: 'W-9 Form',
     category: 'City',
     description: 'W-9 form for tax identification',
-    field: 'w9_form_city'
+    field: 'w9_form_city',
+    inputType: 'boolean'
   },
   {
     id: 'insurance_certificates_naming_city',
     label: 'Insurance Certificates (naming city)',
     category: 'City',
     description: 'Insurance certificates with city as additional insured',
-    field: 'insurance_certificates_naming_city'
+    field: 'insurance_certificates_naming_city',
+    inputType: 'boolean'
   },
   {
     id: 'city_business_license',
     label: 'City Business License',
     category: 'City',
     description: 'City-specific business license',
-    field: 'city_business_license'
+    field: 'city_business_license',
+    inputType: 'boolean'
   },
   {
     id: 'non_collusion_affidavit_city',
     label: 'Non-Collusion Affidavit',
     category: 'City',
     description: 'Non-collusion affidavit for city contracts',
-    field: 'non_collusion_affidavit_city'
+    field: 'non_collusion_affidavit_city',
+    inputType: 'boolean'
   },
   {
     id: 'subcontractor_list_construction_city',
     label: 'Subcontractor List (if construction)',
     category: 'City',
     description: 'List of subcontractors for construction projects',
-    field: 'subcontractor_list_construction_city'
+    field: 'subcontractor_list_construction_city',
+    inputType: 'boolean'
   },
   {
     id: 'eeo_certification_city',
     label: 'EEO Certification',
     category: 'City',
     description: 'Equal Employment Opportunity certification',
-    field: 'eeo_certification_city'
+    field: 'eeo_certification_city',
+    inputType: 'boolean'
   },
   {
     id: 'signed_addenda_acknowledgments_city',
     label: 'Signed Addenda Acknowledgments',
     category: 'City',
     description: 'Signed acknowledgments of all addenda',
-    field: 'signed_addenda_acknowledgments_city'
+    field: 'signed_addenda_acknowledgments_city',
+    inputType: 'boolean'
   },
   {
     id: 'pricing_sheet_cost_proposal_city',
     label: 'Pricing Sheet / Cost Proposal',
     category: 'City',
     description: 'Detailed pricing sheet and cost proposal',
-    field: 'pricing_sheet_cost_proposal_city'
+    field: 'pricing_sheet_cost_proposal_city',
+    inputType: 'boolean'
   },
 
   // Universal Requirements (All jurisdictions)
@@ -470,42 +515,48 @@ export const CHECKLIST_ITEMS: ChecklistItem[] = [
     label: 'NAICS / UNSPSC Codes',
     category: 'All',
     description: 'North American Industry Classification System and UNSPSC codes',
-    field: 'naics_unspsc_codes'
+    field: 'naics_unspsc_codes',
+    inputType: 'boolean'
   },
   {
     id: 'sam_gov_registration',
     label: 'SAM.gov Registration',
     category: 'All',
     description: 'System for Award Management registration (if federal funds)',
-    field: 'sam_gov_registration'
+    field: 'sam_gov_registration',
+    inputType: 'boolean'
   },
   {
     id: 'bonding_capacity_construction',
     label: 'Bonding Capacity (if construction)',
     category: 'All',
     description: 'Surety bonding capacity for construction projects',
-    field: 'bonding_capacity_construction'
+    field: 'bonding_capacity_construction',
+    inputType: 'boolean'
   },
   {
     id: 'project_approach_technical_proposal',
     label: 'Project Approach / Technical Proposal',
     category: 'All',
     description: 'Project approach methodology and technical proposal',
-    field: 'project_approach_technical_proposal'
+    field: 'project_approach_technical_proposal',
+    inputType: 'boolean'
   },
   {
     id: 'key_personnel_availability',
     label: 'Key Personnel Availability',
     category: 'All',
     description: 'Availability and commitment of key personnel',
-    field: 'key_personnel_availability'
+    field: 'key_personnel_availability',
+    inputType: 'boolean'
   },
   {
     id: 'pricing_justification_cost_breakdown',
     label: 'Pricing Justification / Cost Breakdown',
     category: 'All',
     description: 'Detailed pricing justification and cost breakdown',
-    field: 'pricing_justification_cost_breakdown'
+    field: 'pricing_justification_cost_breakdown',
+    inputType: 'boolean'
   }
 ]
 
