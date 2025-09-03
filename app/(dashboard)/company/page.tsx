@@ -20,13 +20,15 @@ import {
   Target,
   User,
   Save,
-  X
+  X,
+  ClipboardCheck
 } from 'lucide-react'
 import Link from 'next/link'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import BiddingChecklist from '@/components/company/BiddingChecklist'
 
 interface Certification {
   id: string
@@ -272,6 +274,7 @@ export default function CompanyPage() {
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList>
           <TabsTrigger value="overview">Company Settings</TabsTrigger>
+          <TabsTrigger value="checklist">Bidding Checklist</TabsTrigger>
           <TabsTrigger value="certifications">Certifications</TabsTrigger>
           <TabsTrigger value="subscription">Subscription</TabsTrigger>
         </TabsList>
@@ -647,6 +650,17 @@ export default function CompanyPage() {
               </Card>
             </div>
           </div>
+        </TabsContent>
+
+        <TabsContent value="checklist" className="space-y-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="text-lg font-semibold">Bidding Checklist</h3>
+              <p className="text-sm text-muted-foreground">Complete your compliance requirements for government contracting</p>
+            </div>
+          </div>
+          
+          <BiddingChecklist companyId={company.id} canManage={canManage} />
         </TabsContent>
 
         <TabsContent value="certifications" className="space-y-6">

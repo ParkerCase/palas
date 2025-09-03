@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button'
 export default function QuickActions() {
   const actions = [
     {
-      title: 'Browse Opportunities',
-      description: 'Find new contract opportunities',
+      title: 'Request Opportunities',
+      description: 'Submit opportunity requests',
       href: '/opportunities',
       icon: Search,
       color: 'bg-blue-500 hover:bg-blue-600'

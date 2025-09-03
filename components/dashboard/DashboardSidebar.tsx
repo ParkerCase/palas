@@ -21,7 +21,9 @@ import {
   HardHat,
   Factory,
   Brain,
-  Sparkles
+  Sparkles,
+  Crown,
+  Eye
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -30,6 +32,7 @@ interface DashboardSidebarProps {
   user: {
     id: string
     role: string
+    email?: string
   }
   company: {
     id: string
@@ -54,13 +57,13 @@ const navigation: NavigationItem[] = [
     current: false,
   },
   {
-    name: 'Bid Opportunities',
+    name: 'My Bid Opportunities',
     href: '/opportunities',
     icon: Target,
     current: false,
   },
   {
-    name: 'Applications',
+    name: 'Bidded Opportunities',
     href: '/applications',
     icon: FileText,
     current: false,
@@ -71,12 +74,12 @@ const navigation: NavigationItem[] = [
     icon: Building2,
     current: false,
   },
-  {
-    name: 'Analytics',
-    href: '/analytics',
-    icon: BarChart3,
-    current: false,
-  },
+  // {
+  //   name: 'Analytics',
+  //   href: '/analytics',
+  //   icon: BarChart3,
+  //   current: false,
+  // },
   {
     name: 'Courses',
     href: '/courses',
@@ -142,6 +145,15 @@ const adminNavigation = [
   //   icon: Settings,
   //   current: false,
   // },
+]
+
+const stroomaiAdminNavigation = [
+  {
+    name: 'Opportunity Requests',
+    href: '/admin/opportunity-requests',
+    icon: Eye,
+    current: false,
+  },
 ]
 
 const supportNavigation = [
@@ -218,7 +230,7 @@ export default function DashboardSidebar({ user, company }: DashboardSidebarProp
         </div>
 
         {/* Sector Intelligence Section */}
-        <div className="pt-4">
+        {/* <div className="pt-4">
           {!collapsed && (
             <p className="px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
               Sectors
@@ -276,7 +288,7 @@ export default function DashboardSidebar({ user, company }: DashboardSidebarProp
               )
             })}
           </div>
-        </div>
+        </div> */}
 
         {isOwnerOrAdmin && (
           <>
@@ -314,6 +326,43 @@ export default function DashboardSidebar({ user, company }: DashboardSidebarProp
               </div>
             </div>
           </>
+        )}
+
+        {/* StroomAI Admin Section - Only visible to stroomai.com users */}
+        {user.email?.toLowerCase().includes('stroomai.com') && (
+          <div className="pt-4">
+            {!collapsed && (
+              <p className="px-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                StroomAI Admin
+              </p>
+            )}
+            <div className="mt-2 space-y-1">
+              {stroomaiAdminNavigation.map((item) => {
+                const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={cn(
+                      "group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors",
+                      isActive
+                        ? "bg-purple-50 text-purple-700"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    )}
+                  >
+                    <item.icon
+                      className={cn(
+                        "flex-shrink-0 h-5 w-5",
+                        collapsed ? "mr-0" : "mr-3",
+                        isActive ? "text-purple-500" : "text-gray-400 group-hover:text-gray-500"
+                      )}
+                    />
+                    {!collapsed && item.name}
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
         )}
 
         <div className="pt-4">

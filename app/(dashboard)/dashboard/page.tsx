@@ -11,7 +11,7 @@ import {
   Search, Plus, Bell, Settings, TrendingUp, 
   FileText, Clock, CheckCircle, AlertCircle,
   DollarSign, Building, Calendar, Users,
-  Bot, Star, Award, Crown
+  Bot, Star, Award, Crown, Target
 } from 'lucide-react'
 
 interface DashboardData {
@@ -222,17 +222,10 @@ export default function DashboardPage() {
                     className="bg-white text-blue-600 hover:bg-gray-100"
                     onClick={() => router.push('/opportunities')}
                   >
-                    <Search className="h-4 w-4 mr-2" />
+                    <Target className="h-4 w-4 mr-2" />
                     Request Opportunities
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    className="border-white text-white hover:bg-white hover:text-blue-600"
-                    onClick={() => router.push('/applications')}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    New Application
-                  </Button>
+
                 </div>
               </div>
               {/* Executive Access Link - Only visible to authorized users */}

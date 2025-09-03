@@ -8,101 +8,213 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { Search, Filter, Building, Calendar, DollarSign, Star, MapPin } from 'lucide-react'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { 
+  Search, Filter, Building, Calendar, DollarSign, Star, MapPin, 
+  Target, Mail, CheckCircle, AlertCircle, Info, ArrowRight
+} from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
 
-interface Opportunity {
+interface CompanyProfile {
   id: string
-  title: string
-  agency: string
-  description: string
-  posted_date: string
-  deadline: string
-  value: number
-  type: string
-  location: string
-  fit_score: number
+  name: string
+  industry: string
+  business_type: string
+  company_size: string
+  headquarters_address: string
+  naics_codes?: string[]
+  annual_revenue?: string
+  years_in_business?: string
+  employee_count?: string
 }
 
-export default function OpportunitiesPage() {
+interface OpportunityRequest {
+  id: string
+  user_id: string
+  company_id: string
+  request_type: string
+  description: string
+  budget_range: string
+  location_preference: string
+  industry_focus: string
+  status: string
+  created_at: string
+}
+
+export default function RequestOpportunitiesPage() {
   const { user, loading } = useAuth()
   const router = useRouter()
-  const [opportunities, setOpportunities] = useState<Opportunity[]>([])
-  const [searchQuery, setSearchQuery] = useState('')
+  const { toast } = useToast()
+  const [companyProfile, setCompanyProfile] = useState<CompanyProfile | null>(null)
   const [loadingData, setLoadingData] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
+  const [requestType, setRequestType] = useState('')
+  const [description, setDescription] = useState('')
+  const [budgetRange, setBudgetRange] = useState('')
+  const [locationPreference, setLocationPreference] = useState('')
+  const [industryFocus, setIndustryFocus] = useState('')
+  const [recentRequests, setRecentRequests] = useState<OpportunityRequest[]>([])
   const supabase = createClientComponentClient()
 
   useEffect(() => {
-    // TESTING MODE: Skip auth redirect
-    /*
-    if (!loading && !user) {
-      router.push('/login')
-    } else if (user) {
-      loadOpportunities()
-    }
-    */
-    loadOpportunities()
-  }, [user, loading, router])
+    loadCompanyProfile()
+  }, [])
 
-  const loadOpportunities = async () => {
+  const loadCompanyProfile = async () => {
     try {
       setLoadingData(true)
       
-      // Use real API call to fetch opportunities
-      const response = await fetch('/api/opportunities?limit=50')
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+      if (!user) {
+        console.log('No user found, skipping profile load')
+        return
       }
-      
-      const data = await response.json()
-      
-      if (data.opportunities && Array.isArray(data.opportunities)) {
-        // Transform API data to match our interface
-        const realOpportunities: Opportunity[] = data.opportunities.map((opp: any, index: number) => ({
-          id: opp.id || `opp-${index + 1}`,
-          title: opp.title || opp.name || 'Untitled Opportunity',
-          agency: opp.agency || opp.department || 'Unknown Agency',
-          description: opp.description || opp.summary || 'No description available',
-          posted_date: opp.posted_date || opp.published_date || new Date().toISOString(),
-          deadline: opp.deadline || opp.due_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-          value: opp.value || opp.amount || opp.estimated_value || 1000000,
-          type: opp.type || opp.category || 'contract',
-          location: opp.location || opp.state || 'Nationwide',
-          fit_score: opp.fit_score || opp.aiScore || Math.floor(Math.random() * 30) + 70 // Random score between 70-100
-        }))
-        
-        setOpportunities(realOpportunities)
-      } else {
-        console.warn('No opportunities data received from API')
-        setOpportunities([])
+
+      // Get user's profile to find company
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user.id)
+        .single()
+
+      if (profile?.company_id) {
+        // Get company data
+        const { data: companyData } = await supabase
+          .from('companies')
+          .select('*')
+          .eq('id', profile.company_id)
+          .single()
+
+        if (companyData) {
+          setCompanyProfile(companyData)
+          
+          // Load recent opportunity requests
+          const { data: requests } = await supabase
+            .from('opportunity_requests')
+            .select('*')
+            .eq('company_id', profile.company_id)
+            .order('created_at', { ascending: false })
+            .limit(5)
+
+          if (requests) {
+            setRecentRequests(requests)
+          }
+        }
       }
     } catch (error) {
-      console.error('Failed to load opportunities:', error)
+      console.error('Failed to load company profile:', error)
     } finally {
       setLoadingData(false)
     }
   }
 
-  const getTypeColor = (type: string) => {
-    const colors = {
-      contract: 'bg-blue-100 text-blue-800',
-      grant: 'bg-green-100 text-green-800',
-      sbir: 'bg-purple-100 text-purple-800',
-      sttr: 'bg-orange-100 text-orange-800'
+  const handleSubmitRequest = async () => {
+    if (!user || !companyProfile) {
+      toast({
+        title: 'Error',
+        description: 'Please complete your company profile first',
+        variant: 'destructive',
+      })
+      return
     }
-    return colors[type as keyof typeof colors] || 'bg-gray-100 text-gray-800'
+
+    if (!requestType || !description) {
+      toast({
+        title: 'Error',
+        description: 'Please fill in all required fields',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    try {
+      setSubmitting(true)
+
+      // Create opportunity request in database
+      const { data: request, error } = await supabase
+        .from('opportunity_requests')
+        .insert({
+          user_id: user.id,
+          company_id: companyProfile.id,
+          request_type: requestType,
+          description: description,
+          budget_range: budgetRange,
+          location_preference: locationPreference,
+          industry_focus: industryFocus,
+          status: 'pending',
+          created_at: new Date().toISOString()
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+
+      // Send notification email to admin
+      await fetch('/api/opportunities/request-notification', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          requestId: request.id,
+          userEmail: user.email,
+          userName: user.user_metadata?.full_name || user.email,
+          companyName: companyProfile.name,
+          requestType: requestType,
+          description: description,
+          budgetRange: budgetRange,
+          locationPreference: locationPreference,
+          industryFocus: industryFocus,
+          companyProfile: {
+            industry: companyProfile.industry,
+            businessType: companyProfile.business_type,
+            companySize: companyProfile.company_size,
+            headquarters: companyProfile.headquarters_address,
+            naicsCodes: companyProfile.naics_codes,
+            annualRevenue: companyProfile.annual_revenue,
+            yearsInBusiness: companyProfile.years_in_business,
+            employeeCount: companyProfile.employee_count
+          }
+        })
+      })
+
+      toast({
+        title: 'Request Submitted',
+        description: 'Your opportunity request has been submitted. We\'ll notify you when matching opportunities are found.',
+      })
+
+      // Reset form
+      setRequestType('')
+      setDescription('')
+      setBudgetRange('')
+      setLocationPreference('')
+      setIndustryFocus('')
+
+      // Reload recent requests
+      await loadCompanyProfile()
+
+    } catch (error) {
+      console.error('Failed to submit request:', error)
+      toast({
+        title: 'Error',
+        description: 'Failed to submit request. Please try again.',
+        variant: 'destructive',
+      })
+    } finally {
+      setSubmitting(false)
+    }
   }
 
-  const getFitScoreColor = (score: number) => {
-    if (score >= 90) return 'text-green-600'
-    if (score >= 80) return 'text-yellow-600'
-    return 'text-red-600'
+  const getStatusColor = (status: string) => {
+    const colors = {
+      pending: 'bg-yellow-100 text-yellow-800',
+      processing: 'bg-blue-100 text-blue-800',
+      completed: 'bg-green-100 text-green-800',
+      cancelled: 'bg-red-100 text-red-800'
+    }
+    return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800'
   }
-
-  const filteredOpportunities = opportunities.filter(opp =>
-    opp.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    opp.agency.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    opp.description.toLowerCase().includes(searchQuery.toLowerCase())
-  )
 
   if (loading || loadingData) {
     return (
@@ -115,7 +227,7 @@ export default function OpportunitiesPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      {/* <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
@@ -131,92 +243,231 @@ export default function OpportunitiesPage() {
             </div>
           </div>
         </div>
-      </header>
+      </header> */}
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Search Section */}
+        {/* Info Section */}
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Government Opportunities</h2>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-            <Input
-              type="text"
-              placeholder="Search opportunities by title, agency, or keywords..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 py-3 w-full"
-            />
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+            <div className="flex items-start space-x-3">
+              <Info className="h-6 w-6 text-blue-600 mt-1" />
+              <div>
+                <h2 className="text-lg font-semibold text-blue-900 mb-2">How It Works</h2>
+                <p className="text-blue-800 mb-3">
+                  Submit a request for specific types of opportunities, and our team will source it directly too you where you can pre-fill the applications for easy submission.
+                </p>
+                {/* <div className="flex items-center text-blue-700 text-sm">
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  <span>We'll manually submit your applications to MatchAwards.com</span>
+                </div> */}
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Results */}
-        <div className="space-y-6">
-          {filteredOpportunities.length === 0 ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Request Form */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="h-5 w-5" />
+                Request New Opportunities
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div>
+                <Label htmlFor="requestType">Type of Opportunity *</Label>
+                <Select value={requestType} onValueChange={setRequestType}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select opportunity type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="government_contracts">Government Contracts</SelectItem>
+                    <SelectItem value="grants">Federal Grants</SelectItem>
+                    <SelectItem value="sbir_sttr">SBIR/STTR Programs</SelectItem>
+                    <SelectItem value="cooperative_agreements">Cooperative Agreements</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="description">Description of Needs *</Label>
+                <Textarea
+                  id="description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Describe the specific opportunities you're looking for, your capabilities, and any requirements..."
+                  className="mt-1 min-h-24"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="budgetRange">Budget Range</Label>
+                <Select value={budgetRange} onValueChange={setBudgetRange}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select budget range" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="under_100k">Under $100,000</SelectItem>
+                    <SelectItem value="100k_500k">$100,000 - $500,000</SelectItem>
+                    <SelectItem value="500k_1m">$500,000 - $1,000,000</SelectItem>
+                    <SelectItem value="1m_5m">$1,000,000 - $5,000,000</SelectItem>
+                    <SelectItem value="over_5m">Over $5,000,000</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="locationPreference">Location Preference</Label>
+                <Select value={locationPreference} onValueChange={setLocationPreference}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select location preference" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="california">California</SelectItem>
+                    <SelectItem value="california_counties">California Counties</SelectItem>
+                    <SelectItem value="nationwide">Nationwide</SelectItem>
+                    <SelectItem value="specific_states">Specific States(Specify State in Description Above)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="industryFocus">Industry Focus</Label>
+                <Select value={industryFocus} onValueChange={setIndustryFocus}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select industry focus" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="technology">Technology</SelectItem>
+                    <SelectItem value="healthcare">Healthcare</SelectItem>
+                    <SelectItem value="education">Education</SelectItem>
+                    <SelectItem value="construction">Construction</SelectItem>
+                    <SelectItem value="manufacturing">Manufacturing</SelectItem>
+                    <SelectItem value="professional_services">Professional Services</SelectItem>
+                    <SelectItem value="research_development">Research & Development</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Button 
+                onClick={handleSubmitRequest} 
+                disabled={submitting || !requestType || !description}
+                className="w-full"
+              >
+                {submitting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Submitting Request...
+                  </>
+                ) : (
+                  <>
+                    <Mail className="h-4 w-4 mr-2" />
+                    Submit Request
+                  </>
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Company Profile & Recent Requests */}
+          <div className="space-y-6">
+            {/* Company Profile */}
             <Card>
-              <CardContent className="p-12 text-center">
-                <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No opportunities found</h3>
-                <p className="text-gray-600">
-                  Try adjusting your search terms or browse all opportunities
-                </p>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Building className="h-5 w-5" />
+                  Your Company Profile
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {companyProfile ? (
+                  <div className="space-y-3">
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">Company Name</Label>
+                      <p className="text-sm">{companyProfile.name}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">Industry</Label>
+                      <p className="text-sm">{companyProfile.industry}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">Business Type</Label>
+                      <p className="text-sm">{companyProfile.business_type}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">Company Size</Label>
+                      <p className="text-sm">{companyProfile.company_size}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-gray-600">Headquarters</Label>
+                      <p className="text-sm">{companyProfile.headquarters_address}</p>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => router.push('/company')}
+                      className="mt-3"
+                    >
+                      Update Profile
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="text-center py-4">
+                    <AlertCircle className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-600">Please complete your company profile first</p>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => router.push('/company')}
+                      className="mt-2"
+                    >
+                      Set Up Profile
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
-          ) : (
-            filteredOpportunities.map((opportunity) => (
-              <Card key={opportunity.id} className="hover:shadow-lg transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <h3 className="text-xl font-semibold text-gray-900">
-                          {opportunity.title}
-                        </h3>
-                        <Badge className={getTypeColor(opportunity.type)}>
-                          {opportunity.type.toUpperCase()}
+
+            {/* Recent Requests */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5" />
+                  Recent Requests
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {recentRequests.length > 0 ? (
+                  <div className="space-y-3">
+                    {recentRequests.map((request) => (
+                      <div key={request.id} className="flex justify-between items-start p-3 bg-gray-50 rounded-lg">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-sm">{request.request_type.replace('_', ' ')}</h4>
+                          <p className="text-xs text-gray-600 mt-1">{request.description.substring(0, 60)}...</p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {new Date(request.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <Badge className={getStatusColor(request.status)}>
+                          {request.status}
                         </Badge>
-                        <span className={`font-bold ${getFitScoreColor(opportunity.fit_score)}`}>
-                          {opportunity.fit_score}% match
-                        </span>
                       </div>
-                      <div className="flex items-center space-x-4 text-sm text-gray-600 mb-3">
-                        <div className="flex items-center">
-                          <Building className="h-4 w-4 mr-1" />
-                          {opportunity.agency}
-                        </div>
-                        <div className="flex items-center">
-                          <MapPin className="h-4 w-4 mr-1" />
-                          {opportunity.location}
-                        </div>
-                      </div>
-                      <p className="text-gray-700 mb-4">
-                        {opportunity.description}
-                      </p>
-                      <div className="flex items-center space-x-6 text-sm text-gray-600">
-                        <div className="flex items-center">
-                          <DollarSign className="h-4 w-4 mr-1" />
-                          ${(opportunity.value / 1000000).toFixed(1)}M
-                        </div>
-                        <div className="flex items-center">
-                          <Calendar className="h-4 w-4 mr-1" />
-                          Due: {new Date(opportunity.deadline).toLocaleDateString()}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex flex-col space-y-2">
-                      <Button onClick={() => router.push(`/opportunities/${opportunity.id}/apply`)}>
-                        <Star className="h-4 w-4 mr-2" />
-                        Apply Now
-                      </Button>
-                      <Button variant="outline" onClick={() => router.push(`/opportunities/${opportunity.id}`)}>
-                        View Details
-                      </Button>
-                    </div>
+                    ))}
                   </div>
-                </CardContent>
-              </Card>
-            ))
-          )}
+                ) : (
+                  <div className="text-center py-4">
+                    <Target className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-600">No requests yet</p>
+                    <p className="text-xs text-gray-500">Submit your first opportunity request above</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </main>
     </div>
