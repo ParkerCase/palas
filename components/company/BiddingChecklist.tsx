@@ -80,8 +80,7 @@ export default function BiddingChecklist({ companyId, canManage }: BiddingCheckl
       toast({
         title: 'Error',
         description: 'Failed to load bidding checklist',
-        variant: 'destructive',
-      })
+        variant: 'destructive'})
     } finally {
       setLoading(false)
     }
@@ -107,15 +106,13 @@ export default function BiddingChecklist({ companyId, canManage }: BiddingCheckl
       // Show success toast for visual feedback
       toast({
         title: 'Saved',
-        description: 'Checklist updated successfully',
-      })
+        description: 'Checklist updated successfully'})
     } catch (error) {
       console.error('Error updating checklist:', error)
       toast({
         title: 'Error',
         description: 'Failed to save checklist item',
-        variant: 'destructive',
-      })
+        variant: 'destructive'})
       // Revert the change on error
       setChecklist(checklist)
     } finally {
@@ -143,15 +140,13 @@ export default function BiddingChecklist({ companyId, canManage }: BiddingCheckl
       // Show success toast for visual feedback
       toast({
         title: 'Saved',
-        description: 'Text field updated successfully',
-      })
+        description: 'Text field updated successfully'})
     } catch (error) {
       console.error('Error updating text field:', error)
       toast({
         title: 'Error',
         description: 'Failed to save text field',
-        variant: 'destructive',
-      })
+        variant: 'destructive'})
       // Revert the change on error
       setChecklist(checklist)
     } finally {
@@ -233,7 +228,7 @@ export default function BiddingChecklist({ companyId, canManage }: BiddingCheckl
           {/* Progress by Category */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {CHECKLIST_CATEGORIES.map((category) => {
-              const categoryProgress = progress.byCategory[category.name] || 0
+              const categoryProgress = (progress.byCategory as Record<string, number>)[category.name] || 0
               const categoryTotal = category.items.length
               const categoryPercentage = categoryTotal > 0 ? Math.round((categoryProgress / categoryTotal) * 100) : 0
               
@@ -372,7 +367,7 @@ export default function BiddingChecklist({ companyId, canManage }: BiddingCheckl
                       <div className="flex items-start space-x-3">
                         <Checkbox
                           id={item.id}
-                          checked={checklist[item.field] || false}
+                          checked={Boolean(checklist[item.field]) || false}
                           onCheckedChange={(checked) => handleCheckboxChange(item.field, checked as boolean)}
                           disabled={!canManage || saving}
                           className="mt-1"

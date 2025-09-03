@@ -2,13 +2,10 @@ export const dynamic = 'force-dynamic'
 
 import { getCurrentUser, getCurrentCompany } from '@/lib/auth'
 import { createServerClient } from '@/lib/supabase/server'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader} from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
   Users, 
@@ -21,10 +18,7 @@ import {
   Building2,
   ArrowLeft,
   Settings,
-  Edit,
-  Trash,
-  MoreHorizontal
-} from 'lucide-react'
+  Edit} from 'lucide-react'
 import Link from 'next/link'
 
 interface TeamMember {

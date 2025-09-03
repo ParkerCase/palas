@@ -28,8 +28,6 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { useState, useEffect } from 'react'
-
 interface Opportunity {
   id: string
   title: string
@@ -89,28 +87,24 @@ function formatCurrency(min?: number, max?: number) {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(min)
+      maximumFractionDigits: 0}).format(min)
   }
   if (min && max) {
     return `${new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(min)} - ${new Intl.NumberFormat('en-US', {
+      maximumFractionDigits: 0}).format(min)} - ${new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(max)}`
+      maximumFractionDigits: 0}).format(max)}`
   }
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
     minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(min || max || 0)
+    maximumFractionDigits: 0}).format(min || max || 0)
 }
 
 function formatDate(dateString: string) {

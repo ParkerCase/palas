@@ -12,9 +12,9 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { 
-  Search, Filter, Building, Calendar, DollarSign, Star, MapPin, 
-  Target, Mail, CheckCircle, AlertCircle, Info, ArrowRight, Eye,
-  Plus, Users, Settings, Crown
+  Search, Filter, Building, 
+  Target, Eye,
+  Plus, Settings, Crown
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 
@@ -84,8 +84,7 @@ export default function AdminOpportunityRequestsPage() {
       toast({
         title: 'Access Denied',
         description: 'Only stroomai.com users can access this page',
-        variant: 'destructive',
-      })
+        variant: 'destructive'})
       router.push('/dashboard')
       return
     }
@@ -123,8 +122,7 @@ export default function AdminOpportunityRequestsPage() {
       toast({
         title: 'Error',
         description: 'Failed to load opportunity requests',
-        variant: 'destructive',
-      })
+        variant: 'destructive'})
     } finally {
       setLoadingData(false)
     }
@@ -157,8 +155,7 @@ export default function AdminOpportunityRequestsPage() {
 
       toast({
         title: 'Status Updated',
-        description: `Request status updated to ${status}`,
-      })
+        description: `Request status updated to ${status}`})
 
       // Reload requests
       await loadRequests()
@@ -167,8 +164,7 @@ export default function AdminOpportunityRequestsPage() {
       toast({
         title: 'Error',
         description: 'Failed to update request status',
-        variant: 'destructive',
-      })
+        variant: 'destructive'})
     }
   }
 
@@ -177,8 +173,7 @@ export default function AdminOpportunityRequestsPage() {
       toast({
         title: 'Error',
         description: 'Please fill in all required fields',
-        variant: 'destructive',
-      })
+        variant: 'destructive'})
       return
     }
 
@@ -216,8 +211,7 @@ export default function AdminOpportunityRequestsPage() {
 
       toast({
         title: 'Opportunity Added',
-        description: 'Opportunity has been added and application created for the user',
-      })
+        description: 'Opportunity has been added and application created for the user'})
 
       setShowAddOpportunity(false)
       setNewOpportunity({
@@ -235,8 +229,7 @@ export default function AdminOpportunityRequestsPage() {
       toast({
         title: 'Error',
         description: 'Failed to add opportunity',
-        variant: 'destructive',
-      })
+        variant: 'destructive'})
     }
   }
 

@@ -20,9 +20,7 @@ import {
   Target,
   User,
   Save,
-  X,
-  ClipboardCheck
-} from 'lucide-react'
+  X} from 'lucide-react'
 import Link from 'next/link'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -212,8 +210,7 @@ export default function CompanyPage() {
       
       toast({
         title: 'Success',
-        description: 'Company information updated successfully',
-      })
+        description: 'Company information updated successfully'})
       
       setEditing(false)
       await loadData() // Reload data
@@ -222,8 +219,7 @@ export default function CompanyPage() {
       toast({
         title: 'Error',
         description: 'Failed to save company information',
-        variant: 'destructive',
-      })
+        variant: 'destructive'})
     } finally {
       setSaving(false)
     }

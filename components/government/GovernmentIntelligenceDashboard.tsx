@@ -17,18 +17,13 @@ import {
   MapPin, 
   Award,
   BarChart3,
-  FileText,
   Target,
   RefreshCw,
-  CheckCircle,
   Phone,
   Mail,
-  Activity,
   Globe,
   Flag,
   Landmark,
-  Shield,
-  Scale,
   Building,
   Home
 } from 'lucide-react'
@@ -147,9 +142,7 @@ export default function GovernmentIntelligenceDashboard() {
       
       const response = await fetch(`/api/government?${params.toString()}`, {
         headers: {
-          'Authorization': `Bearer ${session?.access_token}`,
-        },
-      })
+          'Authorization': `Bearer ${session?.access_token}`}})
       
       if (!response.ok) {
         throw new Error('Failed to fetch entities')
@@ -160,8 +153,7 @@ export default function GovernmentIntelligenceDashboard() {
         setEntities(data.entities)
         toast({
           title: "Success",
-          description: `Found ${data.entities.length} government entities`,
-        })
+          description: `Found ${data.entities.length} government entities`})
       } else {
         throw new Error(data.error || 'Failed to fetch entities')
       }
@@ -170,8 +162,7 @@ export default function GovernmentIntelligenceDashboard() {
       toast({
         title: "Error",
         description: "Failed to search entities. Please try again.",
-        variant: "destructive",
-      })
+        variant: "destructive"})
     } finally {
       setLoading(false)
     }
@@ -184,9 +175,7 @@ export default function GovernmentIntelligenceDashboard() {
       
       const response = await fetch('/api/government?action=overview', {
         headers: {
-          'Authorization': `Bearer ${session?.access_token}`,
-        },
-      })
+          'Authorization': `Bearer ${session?.access_token}`}})
       
       if (!response.ok) {
         throw new Error('Failed to fetch overview')
@@ -218,9 +207,7 @@ export default function GovernmentIntelligenceDashboard() {
 
       const response = await fetch(`/api/government?${params.toString()}`, {
         headers: {
-          'Authorization': `Bearer ${session?.access_token}`,
-        },
-      })
+          'Authorization': `Bearer ${session?.access_token}`}})
       
       if (!response.ok) {
         throw new Error('Failed to fetch spending analysis')
@@ -232,16 +219,14 @@ export default function GovernmentIntelligenceDashboard() {
         setActiveTab('spending')
         toast({
           title: "Success",
-          description: "Government spending analysis loaded",
-        })
+          description: "Government spending analysis loaded"})
       }
     } catch (error) {
       console.error('Spending analysis error:', error)
       toast({
         title: "Error",
         description: "Failed to load spending analysis. Please try again.",
-        variant: "destructive",
-      })
+        variant: "destructive"})
     } finally {
       setLoading(false)
     }

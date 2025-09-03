@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState} from 'react'
 import { Check, ChevronsUpDown, MapPin } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -10,21 +10,17 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
-  CommandList,
-} from '@/components/ui/command'
+  CommandList} from '@/components/ui/command'
 import {
   Popover,
   PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
+  PopoverTrigger} from '@/components/ui/popover'
 import { Badge } from '@/components/ui/badge'
 import { 
   CALIFORNIA_COUNTIES, 
   getCaliforniaCounties, 
   getCitiesByCounty,
-  CaliforniaLocation,
-  CaliforniaCounty
-} from '@/lib/data/california-locations'
+  CaliforniaLocation} from '@/lib/data/california-locations'
 
 interface CaliforniaLocationSelectorProps {
   value?: string

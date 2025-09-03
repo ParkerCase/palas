@@ -24,9 +24,7 @@ import {
   FileText,
   Lightbulb,
   RefreshCw,
-  AlertCircle,
   CheckCircle,
-  Clock,
   Heart,
   HardHat,
   Factory,
@@ -134,9 +132,7 @@ export default function EducationIntelligenceDashboard() {
       
       const response = await fetch(`/api/education?${params.toString()}`, {
         headers: {
-          'Authorization': `Bearer ${session?.access_token}`,
-        },
-      })
+          'Authorization': `Bearer ${session?.access_token}`}})
       
       if (!response.ok) {
         throw new Error('Failed to fetch institutions')
@@ -147,8 +143,7 @@ export default function EducationIntelligenceDashboard() {
         setInstitutions(data.institutions)
         toast({
           title: "Success",
-          description: `Found ${data.institutions.length} institutions`,
-        })
+          description: `Found ${data.institutions.length} institutions`})
       } else {
         throw new Error(data.error || 'Failed to fetch institutions')
       }
@@ -157,8 +152,7 @@ export default function EducationIntelligenceDashboard() {
       toast({
         title: "Error",
         description: "Failed to search institutions. Please try again.",
-        variant: "destructive",
-      })
+        variant: "destructive"})
     } finally {
       setLoading(false)
     }
@@ -171,9 +165,7 @@ export default function EducationIntelligenceDashboard() {
       
       const response = await fetch(`/api/education?action=profile&id=${institutionId}`, {
         headers: {
-          'Authorization': `Bearer ${session?.access_token}`,
-        },
-      })
+          'Authorization': `Bearer ${session?.access_token}`}})
       
       if (!response.ok) {
         throw new Error('Failed to fetch institution profile')
@@ -185,8 +177,7 @@ export default function EducationIntelligenceDashboard() {
         setActiveTab('profile')
         toast({
           title: "Success",
-          description: "Institution profile loaded",
-        })
+          description: "Institution profile loaded"})
       } else {
         throw new Error(data.error || 'Failed to fetch institution profile')
       }
@@ -195,8 +186,7 @@ export default function EducationIntelligenceDashboard() {
       toast({
         title: "Error",
         description: "Failed to load institution profile. Please try again.",
-        variant: "destructive",
-      })
+        variant: "destructive"})
     } finally {
       setLoading(false)
     }
@@ -216,9 +206,7 @@ export default function EducationIntelligenceDashboard() {
 
       const response = await fetch(`/api/education?${params.toString()}`, {
         headers: {
-          'Authorization': `Bearer ${session?.access_token}`,
-        },
-      })
+          'Authorization': `Bearer ${session?.access_token}`}})
       
       if (!response.ok) {
         throw new Error('Failed to fetch spending analysis')
@@ -230,8 +218,7 @@ export default function EducationIntelligenceDashboard() {
         setActiveTab('spending')
         toast({
           title: "Success",
-          description: "Spending analysis loaded",
-        })
+          description: "Spending analysis loaded"})
       } else {
         throw new Error(data.error || 'Failed to fetch spending analysis')
       }
@@ -240,8 +227,7 @@ export default function EducationIntelligenceDashboard() {
       toast({
         title: "Error",
         description: "Failed to load spending analysis. Please try again.",
-        variant: "destructive",
-      })
+        variant: "destructive"})
     } finally {
       setLoading(false)
     }

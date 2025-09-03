@@ -18,16 +18,11 @@ import {
   MapPin, 
   Award,
   BarChart3,
-  FileText,
   Target,
   RefreshCw,
-  CheckCircle,
   Phone,
   Mail,
-  Activity,
   Cog,
-  Package,
-  Truck,
   Shield,
   Zap,
   Car,
@@ -146,9 +141,7 @@ export default function ManufacturingIntelligenceDashboard() {
       
       const response = await fetch(`/api/manufacturing?${params.toString()}`, {
         headers: {
-          'Authorization': `Bearer ${session?.access_token}`,
-        },
-      })
+          'Authorization': `Bearer ${session?.access_token}`}})
       
       if (!response.ok) {
         throw new Error('Failed to fetch companies')
@@ -159,8 +152,7 @@ export default function ManufacturingIntelligenceDashboard() {
         setCompanies(data.companies)
         toast({
           title: "Success",
-          description: `Found ${data.companies.length} manufacturing companies`,
-        })
+          description: `Found ${data.companies.length} manufacturing companies`})
       } else {
         throw new Error(data.error || 'Failed to fetch companies')
       }
@@ -169,8 +161,7 @@ export default function ManufacturingIntelligenceDashboard() {
       toast({
         title: "Error",
         description: "Failed to search companies. Please try again.",
-        variant: "destructive",
-      })
+        variant: "destructive"})
     } finally {
       setLoading(false)
     }
@@ -183,9 +174,7 @@ export default function ManufacturingIntelligenceDashboard() {
       
       const response = await fetch('/api/manufacturing?action=overview', {
         headers: {
-          'Authorization': `Bearer ${session?.access_token}`,
-        },
-      })
+          'Authorization': `Bearer ${session?.access_token}`}})
       
       if (!response.ok) {
         throw new Error('Failed to fetch overview')
@@ -216,9 +205,7 @@ export default function ManufacturingIntelligenceDashboard() {
 
       const response = await fetch(`/api/manufacturing?${params.toString()}`, {
         headers: {
-          'Authorization': `Bearer ${session?.access_token}`,
-        },
-      })
+          'Authorization': `Bearer ${session?.access_token}`}})
       
       if (!response.ok) {
         throw new Error('Failed to fetch spending analysis')
@@ -230,16 +217,14 @@ export default function ManufacturingIntelligenceDashboard() {
         setActiveTab('spending')
         toast({
           title: "Success",
-          description: "Manufacturing spending analysis loaded",
-        })
+          description: "Manufacturing spending analysis loaded"})
       }
     } catch (error) {
       console.error('Spending analysis error:', error)
       toast({
         title: "Error",
         description: "Failed to load spending analysis. Please try again.",
-        variant: "destructive",
-      })
+        variant: "destructive"})
     } finally {
       setLoading(false)
     }

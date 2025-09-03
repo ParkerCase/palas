@@ -18,13 +18,10 @@ import {
   MapPin, 
   Award,
   BarChart3,
-  FileText,
   Target,
   RefreshCw,
-  CheckCircle,
   Phone,
   Mail,
-  Activity,
   Truck,
   Hammer,
   Calculator,
@@ -139,9 +136,7 @@ export default function ConstructionIntelligenceDashboard() {
       
       const response = await fetch(`/api/construction?${params.toString()}`, {
         headers: {
-          'Authorization': `Bearer ${session?.access_token}`,
-        },
-      })
+          'Authorization': `Bearer ${session?.access_token}`}})
       
       if (!response.ok) {
         throw new Error('Failed to fetch companies')
@@ -152,8 +147,7 @@ export default function ConstructionIntelligenceDashboard() {
         setCompanies(data.companies)
         toast({
           title: "Success",
-          description: `Found ${data.companies.length} construction companies`,
-        })
+          description: `Found ${data.companies.length} construction companies`})
       } else {
         throw new Error(data.error || 'Failed to fetch companies')
       }
@@ -162,8 +156,7 @@ export default function ConstructionIntelligenceDashboard() {
       toast({
         title: "Error",
         description: "Failed to search companies. Please try again.",
-        variant: "destructive",
-      })
+        variant: "destructive"})
     } finally {
       setLoading(false)
     }
@@ -176,9 +169,7 @@ export default function ConstructionIntelligenceDashboard() {
       
       const response = await fetch('/api/construction?action=overview', {
         headers: {
-          'Authorization': `Bearer ${session?.access_token}`,
-        },
-      })
+          'Authorization': `Bearer ${session?.access_token}`}})
       
       if (!response.ok) {
         throw new Error('Failed to fetch overview')
@@ -209,9 +200,7 @@ export default function ConstructionIntelligenceDashboard() {
 
       const response = await fetch(`/api/construction?${params.toString()}`, {
         headers: {
-          'Authorization': `Bearer ${session?.access_token}`,
-        },
-      })
+          'Authorization': `Bearer ${session?.access_token}`}})
       
       if (!response.ok) {
         throw new Error('Failed to fetch spending analysis')
@@ -223,16 +212,14 @@ export default function ConstructionIntelligenceDashboard() {
         setActiveTab('spending')
         toast({
           title: "Success",
-          description: "Construction spending analysis loaded",
-        })
+          description: "Construction spending analysis loaded"})
       }
     } catch (error) {
       console.error('Spending analysis error:', error)
       toast({
         title: "Error",
         description: "Failed to load spending analysis. Please try again.",
-        variant: "destructive",
-      })
+        variant: "destructive"})
     } finally {
       setLoading(false)
     }

@@ -13,8 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+  DropdownMenuTrigger} from '@/components/ui/dropdown-menu'
 import { signOut } from '@/lib/auth/client'
 import { getInitials } from '@/lib/utils'
 
@@ -34,7 +33,7 @@ interface DashboardNavProps {
 }
 
 export default function DashboardNav({ user, company }: DashboardNavProps) {
-  const [isSearchFocused, setIsSearchFocused] = useState(false)
+  const [, setIsSearchFocused] = useState(false)
   const router = useRouter()
 
   const handleSignOut = async () => {

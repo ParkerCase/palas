@@ -18,10 +18,8 @@ import {
   MapPin, 
   Award,
   BarChart3,
-  FileText,
   Target,
   RefreshCw,
-  CheckCircle,
   Phone,
   Mail,
   Activity,
@@ -142,9 +140,7 @@ export default function HealthcareIntelligenceDashboard() {
       
       const response = await fetch(`/api/healthcare?${params.toString()}`, {
         headers: {
-          'Authorization': `Bearer ${session?.access_token}`,
-        },
-      })
+          'Authorization': `Bearer ${session?.access_token}`}})
       
       if (!response.ok) {
         throw new Error('Failed to fetch providers')
@@ -155,8 +151,7 @@ export default function HealthcareIntelligenceDashboard() {
         setProviders(data.providers)
         toast({
           title: "Success",
-          description: `Found ${data.providers.length} healthcare providers`,
-        })
+          description: `Found ${data.providers.length} healthcare providers`})
       } else {
         throw new Error(data.error || 'Failed to fetch providers')
       }
@@ -165,8 +160,7 @@ export default function HealthcareIntelligenceDashboard() {
       toast({
         title: "Error",
         description: "Failed to search providers. Please try again.",
-        variant: "destructive",
-      })
+        variant: "destructive"})
     } finally {
       setLoading(false)
     }
@@ -179,9 +173,7 @@ export default function HealthcareIntelligenceDashboard() {
       
       const response = await fetch('/api/healthcare?action=overview', {
         headers: {
-          'Authorization': `Bearer ${session?.access_token}`,
-        },
-      })
+          'Authorization': `Bearer ${session?.access_token}`}})
       
       if (!response.ok) {
         throw new Error('Failed to fetch overview')
@@ -212,9 +204,7 @@ export default function HealthcareIntelligenceDashboard() {
 
       const response = await fetch(`/api/healthcare?${params.toString()}`, {
         headers: {
-          'Authorization': `Bearer ${session?.access_token}`,
-        },
-      })
+          'Authorization': `Bearer ${session?.access_token}`}})
       
       if (!response.ok) {
         throw new Error('Failed to fetch spending analysis')
@@ -226,16 +216,14 @@ export default function HealthcareIntelligenceDashboard() {
         setActiveTab('spending')
         toast({
           title: "Success",
-          description: "Healthcare spending analysis loaded",
-        })
+          description: "Healthcare spending analysis loaded"})
       }
     } catch (error) {
       console.error('Spending analysis error:', error)
       toast({
         title: "Error",
         description: "Failed to load spending analysis. Please try again.",
-        variant: "destructive",
-      })
+        variant: "destructive"})
     } finally {
       setLoading(false)
     }

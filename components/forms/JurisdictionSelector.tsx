@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState} from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -18,10 +18,7 @@ import {
   Star
 } from 'lucide-react'
 import { 
-  CALIFORNIA_COUNTIES, 
-  getCaliforniaCounties,
-  getCitiesByCounty,
-  CaliforniaLocation,
+  CALIFORNIA_COUNTIES,
   CaliforniaCounty
 } from '@/lib/data/california-locations'
 

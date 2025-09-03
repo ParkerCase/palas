@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createRouteHandlerClient } from '@/lib/supabase/server'
-import { cookies } from 'next/headers'
 import { CreateOpportunityRequest, UpdateOpportunityRequest } from '@/types/opportunity-requests'
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createRouteHandlerClient({ cookies })
+    const supabase = createRouteHandlerClient(request)
     
     // Get current user
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -45,7 +44,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createRouteHandlerClient({ cookies })
+    const supabase = createRouteHandlerClient(request)
     
     // Get current user
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -103,7 +102,7 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const supabase = createRouteHandlerClient({ cookies })
+    const supabase = createRouteHandlerClient(request)
     
     // Get current user
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -165,7 +164,7 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const supabase = createRouteHandlerClient({ cookies })
+    const supabase = createRouteHandlerClient(request)
     
     // Get current user
     const { data: { user }, error: authError } = await supabase.auth.getUser()

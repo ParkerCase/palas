@@ -7,14 +7,11 @@ import { createClientComponentClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { 
-  Search, Filter, Building, Calendar, DollarSign, Star, MapPin, 
-  Target, Mail, CheckCircle, AlertCircle, Info, ArrowRight
-} from 'lucide-react'
+import { Building, Calendar, 
+  Target, Mail, CheckCircle, AlertCircle, Info} from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 
 interface CompanyProfile {
@@ -114,8 +111,7 @@ export default function RequestOpportunitiesPage() {
       toast({
         title: 'Error',
         description: 'Please complete your company profile first',
-        variant: 'destructive',
-      })
+        variant: 'destructive'})
       return
     }
 
@@ -123,8 +119,7 @@ export default function RequestOpportunitiesPage() {
       toast({
         title: 'Error',
         description: 'Please fill in all required fields',
-        variant: 'destructive',
-      })
+        variant: 'destructive'})
       return
     }
 
@@ -154,8 +149,7 @@ export default function RequestOpportunitiesPage() {
       await fetch('/api/opportunities/request-notification', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-        },
+          'Content-Type': 'application/json'},
         body: JSON.stringify({
           requestId: request.id,
           userEmail: user.email,
@@ -181,8 +175,7 @@ export default function RequestOpportunitiesPage() {
 
       toast({
         title: 'Request Submitted',
-        description: 'Your opportunity request has been submitted. We\'ll notify you when matching opportunities are found.',
-      })
+        description: 'Your opportunity request has been submitted. We\'ll notify you when matching opportunities are found.'})
 
       // Reset form
       setRequestType('')
@@ -199,8 +192,7 @@ export default function RequestOpportunitiesPage() {
       toast({
         title: 'Error',
         description: 'Failed to submit request. Please try again.',
-        variant: 'destructive',
-      })
+        variant: 'destructive'})
     } finally {
       setSubmitting(false)
     }

@@ -20,9 +20,7 @@ import {
   Heart,
   HardHat,
   Factory,
-  Brain,
   Sparkles,
-  Crown,
   Eye
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -54,26 +52,22 @@ const navigation: NavigationItem[] = [
     name: 'Dashboard',
     href: '/dashboard',
     icon: LayoutDashboard,
-    current: false,
-  },
+    current: false},
   {
     name: 'My Bid Opportunities',
     href: '/opportunities',
     icon: Target,
-    current: false,
-  },
+    current: false},
   {
     name: 'Bidded Opportunities',
     href: '/applications',
     icon: FileText,
-    current: false,
-  },
+    current: false},
   {
     name: 'Company',
     href: '/company',
     icon: Building2,
-    current: false,
-  },
+    current: false},
   // {
   //   name: 'Analytics',
   //   href: '/analytics',
@@ -84,8 +78,7 @@ const navigation: NavigationItem[] = [
     name: 'Courses',
     href: '/courses',
     icon: Book,
-    current: false,
-  },
+    current: false},
 ]
 
 const sectorNavigation = [
@@ -94,36 +87,31 @@ const sectorNavigation = [
     href: '/education',
     icon: GraduationCap,
     current: false,
-    disabled: true,
-  },
+    disabled: true},
   {
     name: 'Healthcare',
     href: '/healthcare',
     icon: Heart,
     current: false,
-    disabled: true,
-  },
+    disabled: true},
   {
     name: 'Construction',
     href: '/construction',
     icon: HardHat,
     current: false,
-    disabled: true,
-  },
+    disabled: true},
   {
     name: 'Manufacturing',
     href: '/manufacturing',
     icon: Factory,
     current: false,
-    disabled: true,
-  },
+    disabled: true},
   {
     name: 'Government',
     href: '/government',
     icon: Building2,
     current: false,
-    disabled: true,
-  },
+    disabled: true},
 ]
 
 const adminNavigation = [
@@ -131,8 +119,7 @@ const adminNavigation = [
     name: 'Subscription',
     href: '/company/subscription',
     icon: CreditCard,
-    current: false,
-  },
+    current: false},
   // {
   //   name: 'Team',
   //   href: '/company/team',
@@ -152,8 +139,7 @@ const stroomaiAdminNavigation = [
     name: 'Opportunity Requests',
     href: '/admin/opportunity-requests',
     icon: Eye,
-    current: false,
-  },
+    current: false},
 ]
 
 const supportNavigation = [
@@ -161,8 +147,7 @@ const supportNavigation = [
     name: 'Support',
     href: '/support',
     icon: HelpCircle,
-    current: false,
-  },
+    current: false},
 ]
 
 export default function DashboardSidebar({ user, company }: DashboardSidebarProps) {

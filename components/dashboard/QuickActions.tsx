@@ -1,7 +1,5 @@
 import Link from 'next/link'
 import { Plus, Search, FileText, Building2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-
 export default function QuickActions() {
   const actions = [
     {

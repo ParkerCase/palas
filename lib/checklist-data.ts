@@ -61,14 +61,16 @@ export const CHECKLIST_ITEMS: ChecklistItem[] = [
     label: 'CA Seller\'s Permit (if applicable)',
     category: 'State',
     description: 'California Seller\'s Permit for sales tax collection',
-    field: 'ca_sellers_permit_state'
+    field: 'ca_sellers_permit_state',
+    inputType: 'boolean'
   },
   {
     id: 'insurance_certificates_state',
     label: 'Insurance Certificates',
     category: 'State',
     description: 'General liability and other required insurance certificates',
-    field: 'insurance_certificates_state'
+    field: 'insurance_certificates_state',
+    inputType: 'boolean'
   },
   {
     id: 'financial_statements_state',
@@ -538,7 +540,7 @@ export function getChecklistProgress(checklist: any): {
 } {
   const byCategory: { [key: string]: number } = {}
   let completed = 0
-  let total = CHECKLIST_ITEMS.length
+  const total = CHECKLIST_ITEMS.length
 
   CHECKLIST_CATEGORIES.forEach(category => {
     const categoryItems = category.items

@@ -7,14 +7,11 @@ import { createClientComponentClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Metric, Title, Text, Grid } from '@/components/ui/card'
+import { Metric, Text, Grid } from '@/components/ui/card'
 import { LineChart, BarChart, DonutChart } from '@/components/ui/charts'
 import { 
-  TrendingUp, TrendingDown, BarChart3, PieChart, 
-  Calendar, Filter, Download, RefreshCw,
-  Users, DollarSign, Target, Award, Clock,
-  Building, FileText, CheckCircle
-} from 'lucide-react'
+  TrendingUp, TrendingDown, Download, RefreshCw, DollarSign, Target, Award, Clock,
+  Building, FileText} from 'lucide-react'
 
 interface AnalyticsData {
   overview: {
@@ -121,8 +118,7 @@ export default function AnalyticsPage() {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount)
+      maximumFractionDigits: 0}).format(amount)
   }
 
   if (loading || loadingData) {
