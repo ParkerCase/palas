@@ -20,10 +20,12 @@ import {
   MapPin,
   Globe,
   Award,
-  Edit3
+  Edit3,
+  Upload
 } from 'lucide-react'
 import { CHECKLIST_CATEGORIES, getChecklistProgress } from '@/lib/checklist-data'
 import { CompanyChecklist } from '@/types/checklist'
+import ChecklistFileUpload from './ChecklistFileUpload'
 
 interface BiddingChecklistProps {
   companyId: string
@@ -386,6 +388,31 @@ export default function BiddingChecklist({ companyId, canManage }: BiddingCheckl
                         {checklist[item.field] && (
                           <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
                         )}
+                      </div>
+                    )}
+
+                    {/* File Upload Section */}
+                    {canManage && (
+                      <div className="mt-4 pt-4 border-t">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Upload className="h-4 w-4 text-blue-600" />
+                          <span className="text-sm font-medium">Supporting Documents</span>
+                        </div>
+                        <ChecklistFileUpload
+                          companyId={companyId}
+                          checklistItemId={item.field}
+                          checklistItemLabel={item.label}
+                          maxFiles={5}
+                          maxFileSizeMB={100}
+                          acceptedFileTypes={[
+                            'application/pdf',
+                            'application/msword',
+                            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                            'image/jpeg',
+                            'image/png',
+                            'text/plain'
+                          ]}
+                        />
                       </div>
                     )}
                   </div>
