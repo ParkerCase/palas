@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createServerComponentClient } from '@/lib/supabase/server'
 import OpenAI from 'openai'
 
 const openai = new OpenAI({
@@ -6,7 +6,7 @@ const openai = new OpenAI({
 })
 
 export async function processAIQueue() {
-  const supabase = createClient()
+  const supabase = await createServerComponentClient()
 
   try {
     // Get pending items from queue
@@ -67,7 +67,7 @@ export async function processAIQueue() {
 
         // Determine analysis type and prepare prompt
         let analysisPrompt = ''
-        let fileType = ''
+        const fileType = ''
 
         switch (item.analysis_type) {
           case 'checklist_document':
@@ -175,7 +175,7 @@ export async function processAIQueue() {
         let structuredAnalysis
         try {
           structuredAnalysis = JSON.parse(analysisResult)
-        } catch (parseError) {
+        } catch {
           // If JSON parsing fails, create structured response from text
           structuredAnalysis = {
             summary: analysisResult,
@@ -267,4 +267,3 @@ function extractKeyFindings(text: string): string[] {
 }
 
 // Export for use in cron jobs or manual triggers
-export { processAIQueue }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createServerComponentClient } from '@/lib/supabase/server'
 import OpenAI from 'openai'
 
 const openai = new OpenAI({
@@ -8,7 +8,7 @@ const openai = new OpenAI({
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = await createServerComponentClient()
     
     // Verify authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -249,7 +249,7 @@ function calculateConfidence(text: string): number {
 // GET endpoint to retrieve analysis results
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = await createServerComponentClient()
     
     // Verify authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser()
