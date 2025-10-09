@@ -64,7 +64,7 @@ const navigation: NavigationItem[] = [
     icon: FileText,
     current: false},
   {
-    name: 'Company',
+    name: 'Company Profile',
     href: '/company',
     icon: Building2,
     current: false},
