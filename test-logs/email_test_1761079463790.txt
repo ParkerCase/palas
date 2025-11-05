@@ -1,0 +1,37 @@
+
+EMAIL LOG
+=========
+To: parker@stroomai.com
+Subject: 🎯 New Opportunity Request from Acme Construction Co.
+Message ID: test_1761079463790
+Timestamp: 2025-10-21T20:44:23.790Z
+Status: WOULD BE SENT (MOCK MODE)
+
+CONTENT:
+--------
+
+NEW OPPORTUNITY REQUEST
+=======================
+
+Company Details:
+----------------
+Company Name: Acme Construction Co.
+Industry: Construction  
+Location: Los Angeles, California
+Business Type: Small Business
+NAICS Codes: 236220, 237310
+Request ID: req_test_12345
+
+Next Steps:
+-----------
+1. Review the company profile in the admin panel
+2. Use Brave Search to find relevant opportunities
+3. Select the top 3-5 opportunities
+4. Approve and send to the company
+
+View Request: http://localhost:3000/admin/opportunity-requests
+
+---
+This email was sent to parker@stroomai.com
+GovContractAI Admin Panel
+

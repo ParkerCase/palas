@@ -11,7 +11,7 @@ export interface EmailTemplate {
 }
 
 export class EmailService {
-  private defaultFrom = 'GovContractAI <noreply@govcontractai.com>'
+  private defaultFrom = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev' // Use Resend test domain if custom domain not verified
 
   async sendEmail(template: EmailTemplate): Promise<{ success: boolean; messageId?: string; error?: string }> {
     try {
@@ -153,6 +153,46 @@ export class EmailService {
       subject: `Subscription ${action}: ${planName}`,
       html: this.getSubscriptionUpdateHtml(firstName, planName, action),
       text: this.getSubscriptionUpdateText(firstName, planName, action)
+    }
+
+    const result = await this.sendEmail(template)
+    return { success: result.success, error: result.error }
+  }
+
+  async sendAdminOpportunityRequestNotification(
+    requestId: string,
+    companyName: string,
+    industry: string,
+    location: string,
+    businessType?: string,
+    naicsCodes?: string[]
+  ): Promise<{ success: boolean; error?: string }> {
+    const template: EmailTemplate = {
+      to: ['parker@stroomai.com', 'veteransccsd@gmail.com'], // Send to both admin emails
+      subject: `New Opportunity Request from ${companyName}`,
+      html: this.getAdminOpportunityRequestHtml(requestId, companyName, industry, location, businessType, naicsCodes),
+      text: this.getAdminOpportunityRequestText(requestId, companyName, industry, location, businessType, naicsCodes)
+    }
+
+    const result = await this.sendEmail(template)
+    return { success: result.success, error: result.error }
+  }
+
+  async sendOpportunitiesReadyEmail(
+    email: string,
+    firstName: string,
+    opportunities: Array<{
+      title: string
+      agency: string
+      deadline?: string
+      url: string
+    }>
+  ): Promise<{ success: boolean; error?: string }> {
+    const template: EmailTemplate = {
+      to: email,
+      subject: `🎯 We found ${opportunities.length} perfect opportunities for you!`,
+      html: this.getOpportunitiesReadyHtml(firstName, opportunities),
+      text: this.getOpportunitiesReadyText(firstName, opportunities)
     }
 
     const result = await this.sendEmail(template)
@@ -574,6 +614,176 @@ ${action === 'canceled' ?
 }
 
 Manage subscription: ${process.env.NEXT_PUBLIC_APP_URL}/subscription
+    `
+  }
+
+  private getAdminOpportunityRequestHtml(
+    requestId: string,
+    companyName: string,
+    industry: string,
+    location: string,
+    businessType?: string,
+    naicsCodes?: string[]
+  ): string {
+    return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>New Opportunity Request</title>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: #7c3aed; color: white; padding: 20px; text-align: center; }
+    .content { padding: 20px; }
+    .info-box { border: 1px solid #e5e7eb; padding: 15px; margin: 15px 0; border-radius: 5px; background: #f9fafb; }
+    .button { background: #7c3aed; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 15px; }
+    .label { font-weight: bold; color: #6b7280; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎯 New Opportunity Request</h1>
+    </div>
+    <div class="content">
+      <h2>A new company is requesting opportunities!</h2>
+      
+      <div class="info-box">
+        <p><span class="label">Company Name:</span> ${companyName}</p>
+        <p><span class="label">Industry:</span> ${industry}</p>
+        <p><span class="label">Location:</span> ${location}</p>
+        ${businessType ? `<p><span class="label">Business Type:</span> ${businessType}</p>` : ''}
+        ${naicsCodes && naicsCodes.length > 0 ? `<p><span class="label">NAICS Codes:</span> ${naicsCodes.join(', ')}</p>` : ''}
+      </div>
+      
+      <p>Please review this request and search for matching opportunities using the admin panel.</p>
+      
+      <a href="${process.env.NEXT_PUBLIC_APP_URL}/admin/opportunity-requests" class="button">
+        View Request in Admin Panel
+      </a>
+      
+      <p style="margin-top: 30px; color: #6b7280; font-size: 14px;">
+        Request ID: ${requestId}
+      </p>
+    </div>
+  </div>
+</body>
+</html>
+    `
+  }
+
+  private getAdminOpportunityRequestText(
+    requestId: string,
+    companyName: string,
+    industry: string,
+    location: string,
+    businessType?: string,
+    naicsCodes?: string[]
+  ): string {
+    return `
+New Opportunity Request
+
+A new company is requesting opportunities!
+
+Company Name: ${companyName}
+Industry: ${industry}
+Location: ${location}
+${businessType ? `Business Type: ${businessType}` : ''}
+${naicsCodes && naicsCodes.length > 0 ? `NAICS Codes: ${naicsCodes.join(', ')}` : ''}
+
+Please review this request and search for matching opportunities using the admin panel.
+
+View Request: ${process.env.NEXT_PUBLIC_APP_URL}/admin/opportunity-requests
+
+Request ID: ${requestId}
+    `
+  }
+
+  private getOpportunitiesReadyHtml(
+    firstName: string,
+    opportunities: Array<{
+      title: string
+      agency: string
+      deadline?: string
+      url: string
+    }>
+  ): string {
+    const opportunityList = opportunities.map(opp => `
+      <div style="border: 1px solid #e5e7eb; padding: 15px; margin: 10px 0; border-radius: 5px; background: #f9fafb;">
+        <h3 style="margin: 0 0 10px 0; color: #2563eb;">${opp.title}</h3>
+        <p style="margin: 5px 0;"><strong>Agency:</strong> ${opp.agency}</p>
+        ${opp.deadline ? `<p style="margin: 5px 0;"><strong>Deadline:</strong> ${opp.deadline}</p>` : ''}
+        <a href="${opp.url}" style="color: #2563eb; text-decoration: none; font-weight: 500;">View Opportunity →</a>
+      </div>
+    `).join('')
+
+    return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Your Opportunities Are Ready</title>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: #10b981; color: white; padding: 20px; text-align: center; }
+    .content { padding: 20px; }
+    .button { background: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block; margin-top: 15px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎯 We Found ${opportunities.length} Perfect Opportunities for You!</h1>
+    </div>
+    <div class="content">
+      <h2>Hi ${firstName},</h2>
+      <p>Great news! Our team has found ${opportunities.length} contract opportunities that are perfect matches for your company profile.</p>
+      
+      ${opportunityList}
+      
+      <p style="margin-top: 30px;">
+        <a href="${process.env.NEXT_PUBLIC_APP_URL}/my-opportunities" class="button">
+          View Your Opportunities
+        </a>
+      </p>
+      
+      <p style="margin-top: 20px; color: #6b7280;">
+        These opportunities have been hand-selected by our team based on your company profile. 
+        You can start applying right away!
+      </p>
+    </div>
+  </div>
+</body>
+</html>
+    `
+  }
+
+  private getOpportunitiesReadyText(
+    firstName: string,
+    opportunities: Array<{
+      title: string
+      agency: string
+      deadline?: string
+      url: string
+    }>
+  ): string {
+    const opportunityList = opportunities.map(opp => 
+      `${opp.title}\nAgency: ${opp.agency}\n${opp.deadline ? `Deadline: ${opp.deadline}\n` : ''}${opp.url}\n`
+    ).join('\n---\n\n')
+
+    return `
+Hi ${firstName},
+
+Great news! Our team has found ${opportunities.length} contract opportunities that are perfect matches for your company profile.
+
+${opportunityList}
+
+View Your Opportunities: ${process.env.NEXT_PUBLIC_APP_URL}/my-opportunities
+
+These opportunities have been hand-selected by our team based on your company profile. 
+You can start applying right away!
     `
   }
 }

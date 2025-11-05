@@ -7,9 +7,10 @@ import { createClientComponentClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { useToast } from '@/hooks/use-toast'
 import { Bell, TrendingUp, 
   FileText, Clock, AlertCircle,
-  Bot, Star, Award, Crown, Target
+  Bot, Star, Award, Crown, Target, Loader2
 } from 'lucide-react'
 
 interface DashboardData {
@@ -48,8 +49,10 @@ interface DashboardData {
 export default function DashboardPage() {
   const { user, loading } = useAuth()
   const router = useRouter()
+  const { toast } = useToast()
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
   const [loadingData, setLoadingData] = useState(true)
+  const [requestingOpportunities, setRequestingOpportunities] = useState(false)
   const supabase = createClientComponentClient()
 
   useEffect(() => {
@@ -192,6 +195,39 @@ export default function DashboardPage() {
     }
   }
 
+  const handleGetOpportunities = async () => {
+    setRequestingOpportunities(true)
+    try {
+      const response = await fetch('/api/opportunity-requests/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        toast({
+          title: 'Request Submitted!',
+          description: 'Our team will find opportunities for you within 24 hours.',
+          variant: 'default'
+        })
+      } else {
+        throw new Error(data.error || 'Failed to submit request')
+      }
+    } catch (error) {
+      console.error('Error requesting opportunities:', error)
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to submit opportunity request',
+        variant: 'destructive'
+      })
+    } finally {
+      setRequestingOpportunities(false)
+    }
+  }
+
   if (loading || loadingData) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -217,12 +253,28 @@ export default function DashboardPage() {
                 <div className="flex space-x-4">
                   <Button 
                     className="bg-white text-blue-600 hover:bg-gray-100"
-                    onClick={() => router.push('/opportunities')}
+                    onClick={handleGetOpportunities}
+                    disabled={requestingOpportunities}
                   >
-                    <Target className="h-4 w-4 mr-2" />
-                    Request Opportunities
+                    {requestingOpportunities ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Submitting...
+                      </>
+                    ) : (
+                      <>
+                        <Target className="h-4 w-4 mr-2" />
+                        Get Opportunities
+                      </>
+                    )}
                   </Button>
-
+                  <Button 
+                    variant="outline"
+                    className="bg-white/10 text-white border-white hover:bg-white/20"
+                    onClick={() => router.push('/my-opportunities')}
+                  >
+                    View My Opportunities
+                  </Button>
                 </div>
               </div>
               {/* Executive Access Link - Only visible to authorized users */}

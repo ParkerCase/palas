@@ -1,0 +1,45 @@
+
+EMAIL LOG
+=========
+To: john@acmeconstruction.com
+Subject: 🎉 We Found 3 Perfect Opportunities for Acme Construction Co.!
+Message ID: test_1761080016762
+Timestamp: 2025-10-21T20:53:36.762Z
+Status: WOULD BE SENT (MOCK MODE)
+
+CONTENT:
+--------
+
+YOUR OPPORTUNITIES ARE READY!
+==============================
+
+Hi John,
+
+Great news! Our team has hand-selected the best government contract opportunities 
+specifically for Acme Construction Co.
+
+YOUR TOP OPPORTUNITIES:
+=======================
+
+1. Highway Repair Contract - I-405 Los Angeles
+   Agency: California Department of Transportation
+   Match: 95%
+   Deadline: 2025-11-30
+
+2. Public School Construction Project
+   Agency: Los Angeles Unified School District
+   Match: 88%
+   Deadline: 2025-12-15
+
+3. Bridge Maintenance Services
+   Agency: Los Angeles County Public Works
+   Match: 82%
+   Deadline: 2025-11-20
+
+View all opportunities: http://localhost:3000/my-opportunities
+
+These opportunities were selected based on your company profile, industry, and location.
+
+---
+GovContractAI - Your AI-Powered Government Contracting Platform
+

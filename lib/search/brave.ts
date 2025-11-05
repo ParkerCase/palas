@@ -1,0 +1,285 @@
+/**
+ * Brave Search API Integration
+ * Used for discovering government contract opportunities
+ */
+
+export interface BraveSearchResult {
+  title: string
+  url: string
+  description: string
+  snippet?: string
+  domain?: string
+  published_date?: string
+  rank?: number
+}
+
+export interface BraveSearchResponse {
+  query: string
+  results: BraveSearchResult[]
+  total_results?: number
+}
+
+export class BraveSearchService {
+  private apiKey: string
+  private baseUrl = 'https://api.search.brave.com/res/v1/web/search'
+
+  constructor() {
+    this.apiKey = process.env.BRAVE_SEARCH_API_KEY || ''
+    if (!this.apiKey) {
+      console.warn('BRAVE_SEARCH_API_KEY not configured')
+    }
+  }
+
+  /**
+   * Search for government contract opportunities
+   * @param query - Search query string
+   * @param options - Additional search options
+   */
+  async searchOpportunities(
+    query: string,
+    options: {
+      count?: number
+      filterGov?: boolean
+      freshness?: 'day' | 'week' | 'month' | 'year'
+    } = {}
+  ): Promise<BraveSearchResponse> {
+    const {
+      count = 10,
+      filterGov = true,
+      freshness
+    } = options
+
+    if (!this.apiKey) {
+      throw new Error('Brave Search API key not configured')
+    }
+
+    try {
+      // Build search query
+      let searchQuery = query
+      
+      // Add government site filter if requested
+      if (filterGov) {
+        searchQuery += ' (site:.gov OR site:.mil OR "government contracts")'
+      }
+
+      // Build URL parameters
+      const params = new URLSearchParams({
+        q: searchQuery,
+        count: count.toString(),
+        text_decorations: 'false',
+        search_lang: 'en',
+        country: 'US'
+      })
+
+      if (freshness) {
+        params.append('freshness', freshness)
+      }
+
+      const url = `${this.baseUrl}?${params.toString()}`
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Accept-Encoding': 'gzip',
+          'X-Subscription-Token': this.apiKey
+        }
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Brave Search API error: ${response.status} - ${errorText}`)
+      }
+
+      const data = await response.json()
+
+      // Debug: log structure if no results
+      if (!data.web?.results || data.web.results.length === 0) {
+        console.warn('Brave Search: No web results found. Response structure:', {
+          hasWeb: !!data.web,
+          hasResults: !!data.web?.results,
+          resultCount: data.web?.results?.length || 0,
+          keys: Object.keys(data)
+        })
+      }
+
+      // Parse and filter results
+      const results: BraveSearchResult[] = (data.web?.results || []).map((result: any, index: number) => ({
+        title: result.title || '',
+        url: result.url || '',
+        description: result.description || '',
+        snippet: result.description || '',
+        domain: this.extractDomain(result.url || ''),
+        published_date: result.published_date || result.age || '',
+        rank: index + 1
+      }))
+
+      // Filter for government-related results if requested
+      let filteredResults = results
+      if (filterGov) {
+        // First, try to get .gov results
+        const govResults = results.filter(result => 
+          result.domain?.includes(".gov") || result.url.includes(".gov")
+        )
+        
+        // If we have .gov results, use those. Otherwise, use all results with contract keywords
+        if (govResults.length > 0) {
+          filteredResults = govResults
+        } else {
+          // If no .gov results, keep results with contract keywords
+          filteredResults = results.filter(result => 
+            this.isGovernmentRelated(result)
+          )
+        }
+      }
+
+      return {
+        query: searchQuery,
+        results: filteredResults,
+        total_results: filteredResults.length
+      }
+
+    } catch (error) {
+      console.error('Brave Search error:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Build a dynamic search query from company profile
+   */
+  buildCompanyQuery(companyProfile: {
+    industry: string
+    city?: string
+    state?: string
+    naics_codes?: string[]
+    business_type?: string
+  }): string {
+    const parts: string[] = ['government contracts']
+
+    // Add industry
+    if (companyProfile.industry) {
+      parts.push(companyProfile.industry)
+    }
+
+    // Add location (city AND state)
+    if (companyProfile.city && companyProfile.state) {
+      parts.push(companyProfile.city)
+      parts.push(companyProfile.state)
+    } else if (companyProfile.state) {
+      parts.push(companyProfile.state)
+    }
+
+    // Add NAICS codes
+    if (companyProfile.naics_codes && companyProfile.naics_codes.length > 0) {
+      parts.push('NAICS')
+      parts.push(...companyProfile.naics_codes.slice(0, 3)) // Limit to first 3 codes
+    }
+
+    // Add business type keywords
+    if (companyProfile.business_type) {
+      parts.push(companyProfile.business_type)
+    }
+
+    return parts.join(' ')
+  }
+
+  /**
+   * Check if a result is government-related
+   */
+  private isGovernmentRelated(result: BraveSearchResult): boolean {
+    const govDomains = ['.gov', '.mil', '.state.', '.county.', '.city.']
+    const govKeywords = [
+      'government',
+      'federal',
+      'contract',
+      'solicitation',
+      'rfp',
+      'rfq',
+      'bid',
+      'procurement',
+      'sam.gov',
+      'grants.gov',
+      'usaspending',
+      'gsa'
+    ]
+
+    // Check domain
+    if (result.domain && govDomains.some(domain => result.domain?.includes(domain))) {
+      return true
+    }
+
+    // Check URL
+    if (govDomains.some(domain => result.url.toLowerCase().includes(domain))) {
+      return true
+    }
+
+    // Check title and description for keywords
+    const textToCheck = `${result.title} ${result.description}`.toLowerCase()
+    return govKeywords.some(keyword => textToCheck.includes(keyword))
+  }
+
+  /**
+   * Extract domain from URL
+   */
+  private extractDomain(url: string): string {
+    try {
+      const urlObj = new URL(url)
+      return urlObj.hostname
+    } catch {
+      return ''
+    }
+  }
+
+  /**
+   * Score/rank results based on relevance
+   */
+  scoreResults(
+    results: BraveSearchResult[],
+    companyProfile: {
+      industry: string
+      naics_codes?: string[]
+    }
+  ): Array<BraveSearchResult & { score: number }> {
+    return results.map(result => {
+      let score = 100
+
+      // Boost .gov domains
+      if (result.domain?.includes('.gov')) {
+        score += 20
+      }
+
+      // Boost if industry mentioned
+      if (companyProfile.industry) {
+        const textToCheck = `${result.title} ${result.description}`.toLowerCase()
+        if (textToCheck.includes(companyProfile.industry.toLowerCase())) {
+          score += 15
+        }
+      }
+
+      // Boost if NAICS codes mentioned
+      if (companyProfile.naics_codes && companyProfile.naics_codes.length > 0) {
+        const textToCheck = `${result.title} ${result.description}`.toLowerCase()
+        for (const code of companyProfile.naics_codes) {
+          if (textToCheck.includes(code)) {
+            score += 10
+            break
+          }
+        }
+      }
+
+      // Penalize by rank (lower rank = better position in results)
+      if (result.rank) {
+        score -= (result.rank - 1) * 2
+      }
+
+      return {
+        ...result,
+        score: Math.max(0, score)
+      }
+    }).sort((a, b) => b.score - a.score)
+  }
+}
+
+export const braveSearchService = new BraveSearchService()
+

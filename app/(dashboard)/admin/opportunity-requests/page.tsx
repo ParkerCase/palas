@@ -14,9 +14,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { 
   Search, Filter, Building, 
   Target, Eye,
-  Plus, Settings, Crown
+  Plus, Settings, Crown, Loader2, CheckCircle2, ExternalLink
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { Checkbox } from '@/components/ui/checkbox'
+import { ADMIN_EMAILS } from '@/lib/config/admin'
 
 interface OpportunityRequest {
   id: string
@@ -47,6 +49,16 @@ interface CompanyProfile {
   employee_count?: string
 }
 
+interface SearchResult {
+  title: string
+  url: string
+  description: string
+  snippet?: string
+  domain?: string
+  score?: number
+  rank?: number
+}
+
 export default function AdminOpportunityRequestsPage() {
   const { user, loading } = useAuth()
   const router = useRouter()
@@ -58,6 +70,11 @@ export default function AdminOpportunityRequestsPage() {
   const [selectedRequest, setSelectedRequest] = useState<OpportunityRequest | null>(null)
   const [companyProfile, setCompanyProfile] = useState<CompanyProfile | null>(null)
   const [showAddOpportunity, setShowAddOpportunity] = useState(false)
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([])
+  const [selectedOpportunities, setSelectedOpportunities] = useState<Set<number>>(new Set())
+  const [searchingOpportunities, setSearchingOpportunities] = useState(false)
+  const [approvingOpportunities, setApprovingOpportunities] = useState(false)
+  const [braveSearchQuery, setBraveSearchQuery] = useState('')
   const [newOpportunity, setNewOpportunity] = useState({
     title: '',
     description: '',
@@ -77,13 +94,13 @@ export default function AdminOpportunityRequestsPage() {
   const checkAdminAccess = async () => {
     if (!user?.email) return
 
-    // Check if user has stroomai.com email
-    const isAdmin = user.email.toLowerCase().includes('stroomai.com')
+    // Check if user has authorized email
+    const isAdmin = ADMIN_EMAILS.includes(user.email.toLowerCase() as any)
     
     if (!isAdmin) {
       toast({
         title: 'Access Denied',
-        description: 'Only stroomai.com users can access this page',
+        description: 'You do not have permission to access this page',
         variant: 'destructive'})
       router.push('/dashboard')
       return
@@ -165,6 +182,133 @@ export default function AdminOpportunityRequestsPage() {
         title: 'Error',
         description: 'Failed to update request status',
         variant: 'destructive'})
+    }
+  }
+
+  const handleSearchOpportunities = async () => {
+    if (!selectedRequest) return
+
+    setSearchingOpportunities(true)
+    setSearchResults([])
+    setSelectedOpportunities(new Set())
+
+    try {
+      const response = await fetch('/api/admin/search-opportunities', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          requestId: selectedRequest.id,
+          companyId: selectedRequest.company_id
+        })
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setSearchResults(data.results || [])
+        setBraveSearchQuery(data.query || '')
+        toast({
+          title: 'Search Complete',
+          description: `Found ${data.results?.length || 0} opportunities`
+        })
+      } else {
+        throw new Error(data.error || 'Failed to search opportunities')
+      }
+    } catch (error) {
+      console.error('Error searching opportunities:', error)
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to search opportunities',
+        variant: 'destructive'
+      })
+    } finally {
+      setSearchingOpportunities(false)
+    }
+  }
+
+  const toggleOpportunitySelection = (index: number) => {
+    const newSelection = new Set(selectedOpportunities)
+    if (newSelection.has(index)) {
+      newSelection.delete(index)
+    } else {
+      if (newSelection.size >= 5) {
+        toast({
+          title: 'Maximum Selection',
+          description: 'You can select up to 5 opportunities',
+          variant: 'destructive'
+        })
+        return
+      }
+      newSelection.add(index)
+    }
+    setSelectedOpportunities(newSelection)
+  }
+
+  const handleApproveOpportunities = async () => {
+    if (!selectedRequest || selectedOpportunities.size === 0) {
+      toast({
+        title: 'Error',
+        description: 'Please select at least one opportunity',
+        variant: 'destructive'
+      })
+      return
+    }
+
+    setApprovingOpportunities(true)
+
+    try {
+      const selectedResults = Array.from(selectedOpportunities).map(index => {
+        const result = searchResults[index]
+        return {
+          title: result.title,
+          url: result.url,
+          description: result.description || result.snippet || '',
+          agency: result.domain,
+          source_data: result
+        }
+      })
+
+      const response = await fetch('/api/admin/approve-opportunities', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          requestId: selectedRequest.id,
+          companyId: selectedRequest.company_id,
+          selectedOpportunities: selectedResults
+        })
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        toast({
+          title: 'Success!',
+          description: `Approved ${data.opportunities_created} opportunities and notified the company`
+        })
+        
+        // Reset state
+        setSearchResults([])
+        setSelectedOpportunities(new Set())
+        setSelectedRequest(null)
+        
+        // Reload requests
+        await loadRequests()
+      } else {
+        throw new Error(data.error || 'Failed to approve opportunities')
+      }
+    } catch (error) {
+      console.error('Error approving opportunities:', error)
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to approve opportunities',
+        variant: 'destructive'
+      })
+    } finally {
+      setApprovingOpportunities(false)
     }
   }
 
@@ -263,13 +407,13 @@ export default function AdminOpportunityRequestsPage() {
     )
   }
 
-  if (!user?.email?.toLowerCase().includes('stroomai.com')) {
+  if (!user?.email || !ADMIN_EMAILS.includes(user.email.toLowerCase() as any)) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <Crown className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Access Denied</h2>
-          <p className="text-gray-600">Only stroomai.com users can access this page</p>
+          <p className="text-gray-600">You do not have permission to access this page</p>
         </div>
       </div>
     )
@@ -291,6 +435,9 @@ export default function AdminOpportunityRequestsPage() {
             <div className="flex items-center space-x-4">
               <Button variant="ghost" onClick={() => router.push('/dashboard')}>
                 Dashboard
+              </Button>
+              <Button variant="ghost" onClick={() => router.push('/admin/review-opportunities')}>
+                Review & Approve
               </Button>
               <Button variant="ghost" onClick={() => router.push('/admin')}>
                 Admin Panel
@@ -517,14 +664,119 @@ export default function AdminOpportunityRequestsPage() {
                     </div>
                     
                     <Button 
+                      onClick={handleSearchOpportunities}
+                      className="w-full bg-blue-600 hover:bg-blue-700"
+                      disabled={searchingOpportunities}
+                    >
+                      {searchingOpportunities ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Searching...
+                        </>
+                      ) : (
+                        <>
+                          <Search className="h-4 w-4 mr-2" />
+                          Search Opportunities
+                        </>
+                      )}
+                    </Button>
+
+                    {searchResults.length > 0 && (
+                      <Button 
+                        onClick={handleApproveOpportunities}
+                        className="w-full bg-green-600 hover:bg-green-700"
+                        disabled={approvingOpportunities || selectedOpportunities.size === 0}
+                      >
+                        {approvingOpportunities ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Approving...
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle2 className="h-4 w-4 mr-2" />
+                            Approve & Send ({selectedOpportunities.size})
+                          </>
+                        )}
+                      </Button>
+                    )}
+                    
+                    <Button 
                       onClick={() => setShowAddOpportunity(true)}
+                      variant="outline"
                       className="w-full"
                     >
                       <Plus className="h-4 w-4 mr-2" />
-                      Add Opportunity
+                      Add Manual Opportunity
                     </Button>
                   </CardContent>
                 </Card>
+
+                {/* Search Results */}
+                {searchResults.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Target className="h-5 w-5" />
+                        Search Results ({searchResults.length})
+                      </CardTitle>
+                      {braveSearchQuery && (
+                        <p className="text-xs text-gray-500 mt-1">Query: {braveSearchQuery}</p>
+                      )}
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3 max-h-96 overflow-y-auto">
+                        {searchResults.map((result, index) => (
+                          <div 
+                            key={index}
+                            className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                              selectedOpportunities.has(index)
+                                ? 'border-green-500 bg-green-50'
+                                : 'border-gray-200 hover:border-gray-300'
+                            }`}
+                            onClick={() => toggleOpportunitySelection(index)}
+                          >
+                            <div className="flex items-start gap-2">
+                              <Checkbox 
+                                checked={selectedOpportunities.has(index)}
+                                onCheckedChange={() => toggleOpportunitySelection(index)}
+                                className="mt-1"
+                              />
+                              <div className="flex-1">
+                                <h4 className="font-medium text-sm text-gray-900 mb-1">
+                                  {result.title}
+                                </h4>
+                                <p className="text-xs text-gray-600 mb-2 line-clamp-2">
+                                  {result.description || result.snippet}
+                                </p>
+                                <div className="flex items-center gap-2 text-xs">
+                                  <Badge variant="outline" className="text-xs">
+                                    {result.domain}
+                                  </Badge>
+                                  {result.score && (
+                                    <Badge className="bg-blue-100 text-blue-800 text-xs">
+                                      Score: {result.score}
+                                    </Badge>
+                                  )}
+                                  <a 
+                                    href={result.url} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <ExternalLink className="h-3 w-3" />
+                                    View
+                                  </a>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
               </>
             ) : (
               <Card>
