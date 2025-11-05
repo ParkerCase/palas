@@ -69,16 +69,16 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Create opportunity request
+    // Create opportunity request - using the correct schema columns
     const { data: opportunityRequest, error: createError } = await supabase
       .from('opportunity_requests')
       .insert({
         user_id: user.id,
         company_id: company.id,
+        requested_by: user.id, // Also set requested_by for compatibility
         request_type: 'opportunity_search',
-        description: `Looking for ${company.industry || 'contract'} opportunities in ${location}`,
-        location_preference: location,
-        industry_focus: company.industry || '',
+        notes: `Looking for ${company.industry || 'contract'} opportunities in ${location}`,
+        industry_codes: naicsCodes.length > 0 ? naicsCodes : [],
         status: 'pending', // Start as pending - admin will search and approve
         email_sent: false
       })
@@ -87,8 +87,12 @@ export async function POST(request: NextRequest) {
 
     if (createError) {
       console.error('Error creating opportunity request:', createError)
+      console.error('Error details:', JSON.stringify(createError, null, 2))
       return NextResponse.json(
-        { error: 'Failed to create opportunity request' },
+        { 
+          error: 'Failed to create opportunity request',
+          details: createError.message || 'Unknown error'
+        },
         { status: 500 }
       )
     }
