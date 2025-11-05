@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createRouteHandlerClient } from '@/lib/supabase/server'
 import { emailService } from '@/lib/email'
 import { braveSearchService } from '@/lib/search/brave'
 
@@ -8,7 +7,7 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createRouteHandlerClient({ cookies })
+    const supabase = createRouteHandlerClient(request)
     
     // Get the current user
     const { data: { user }, error: authError } = await supabase.auth.getUser()
