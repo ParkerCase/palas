@@ -35,7 +35,6 @@ async function testEmail() {
 
     if (result.success) {
       console.log('✅ SUCCESS! Email sent to parker@stroomai.com')
-      console.log(`📧 Message ID: ${result.messageId}\n`)
       console.log('Please check the inbox at parker@stroomai.com\n')
       console.log('Expected email:')
       console.log('  Subject: "New Opportunity Request from Acme Construction Co."')
