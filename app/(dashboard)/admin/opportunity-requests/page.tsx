@@ -1,6 +1,5 @@
 'use client'
 
-import { useAuth } from '../../../components/auth/AuthProvider'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { createClientComponentClient } from '@/lib/supabase/client'
@@ -14,11 +13,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { 
   Search, Filter, Building, 
   Target, Eye,
-  Plus, Settings, Crown, Loader2, CheckCircle2, ExternalLink
+  Plus, Settings, Crown, Loader2, CheckCircle2, ExternalLink, Lock
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { Checkbox } from '@/components/ui/checkbox'
-import { ADMIN_EMAILS } from '@/lib/config/admin'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 interface OpportunityRequest {
   id: string
@@ -59,10 +65,14 @@ interface SearchResult {
   rank?: number
 }
 
+const ADMIN_PASSWORD = 'UnoBrothers4Life'
+
 export default function AdminOpportunityRequestsPage() {
-  const { user, loading } = useAuth()
   const router = useRouter()
   const { toast } = useToast()
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [password, setPassword] = useState('')
+  const [passwordError, setPasswordError] = useState(false)
   const [requests, setRequests] = useState<OpportunityRequest[]>([])
   const [loadingData, setLoadingData] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
@@ -84,30 +94,6 @@ export default function AdminOpportunityRequestsPage() {
     source: 'matchawards'
   })
   const supabase = createClientComponentClient()
-
-  useEffect(() => {
-    if (!loading && user) {
-      checkAdminAccess()
-    }
-  }, [user, loading])
-
-  const checkAdminAccess = async () => {
-    if (!user?.email) return
-
-    // Check if user has authorized email
-    const isAdmin = ADMIN_EMAILS.includes(user.email.toLowerCase() as any)
-    
-    if (!isAdmin) {
-      toast({
-        title: 'Access Denied',
-        description: 'You do not have permission to access this page',
-        variant: 'destructive'})
-      router.push('/dashboard')
-      return
-    }
-
-    loadRequests()
-  }
 
   const loadRequests = async () => {
     try {
@@ -142,6 +128,28 @@ export default function AdminOpportunityRequestsPage() {
         variant: 'destructive'})
     } finally {
       setLoadingData(false)
+    }
+  }
+
+  useEffect(() => {
+    // Check if already authenticated in this session
+    const authStatus = sessionStorage.getItem('admin_opportunity_requests_authenticated')
+    if (authStatus === 'true') {
+      setIsAuthenticated(true)
+      loadRequests()
+    }
+  }, [])
+
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (password === ADMIN_PASSWORD) {
+      setIsAuthenticated(true)
+      sessionStorage.setItem('admin_opportunity_requests_authenticated', 'true')
+      setPasswordError(false)
+      loadRequests()
+    } else {
+      setPasswordError(true)
+      setPassword('')
     }
   }
 
@@ -399,22 +407,56 @@ export default function AdminOpportunityRequestsPage() {
     return matchesSearch && matchesStatus
   })
 
-  if (loading || loadingData) {
+  // Show password modal if not authenticated
+  if (!isAuthenticated) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
+      <Dialog open={true}>
+        <DialogContent className="sm:max-w-md" onPointerDownOutside={(e) => e.preventDefault()}>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Lock className="h-5 w-5" />
+              Admin Access Required
+            </DialogTitle>
+            <DialogDescription>
+              Please enter the password to access the opportunity requests panel.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handlePasswordSubmit}>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value)
+                    setPasswordError(false)
+                  }}
+                  placeholder="Enter password"
+                  className={passwordError ? 'border-red-500' : ''}
+                  autoFocus
+                />
+                {passwordError && (
+                  <p className="text-sm text-red-500">Incorrect password. Please try again.</p>
+                )}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="submit" className="w-full">
+                Access Panel
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     )
   }
 
-  if (!user?.email || !ADMIN_EMAILS.includes(user.email.toLowerCase() as any)) {
+  if (loadingData) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <Crown className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Access Denied</h2>
-          <p className="text-gray-600">You do not have permission to access this page</p>
-        </div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     )
   }
