@@ -99,32 +99,20 @@ export default function AdminOpportunityRequestsPage() {
     try {
       setLoadingData(true)
       
-      // Get all opportunity requests with user and company info
-      const { data: requestsData, error } = await supabase
-        .from('opportunity_requests')
-        .select(`
-          *,
-          profiles!opportunity_requests_user_id_fkey(email, full_name),
-          companies!opportunity_requests_company_id_fkey(name)
-        `)
-        .order('created_at', { ascending: false })
+      // Use API endpoint to bypass RLS restrictions
+      const response = await fetch('/api/admin/opportunity-requests')
+      const data = await response.json()
 
-      if (error) throw error
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to load requests')
+      }
 
-      // Transform the data to include user and company info
-      const transformedRequests = requestsData?.map((req: any) => ({
-        ...req,
-        user_email: req.profiles?.email,
-        user_name: req.profiles?.full_name,
-        company_name: req.companies?.name
-      })) || []
-
-      setRequests(transformedRequests)
+      setRequests(data.requests || [])
     } catch (error) {
       console.error('Failed to load requests:', error)
       toast({
         title: 'Error',
-        description: 'Failed to load opportunity requests',
+        description: error instanceof Error ? error.message : 'Failed to load opportunity requests',
         variant: 'destructive'})
     } finally {
       setLoadingData(false)
@@ -136,7 +124,13 @@ export default function AdminOpportunityRequestsPage() {
     const authStatus = sessionStorage.getItem('admin_opportunity_requests_authenticated')
     if (authStatus === 'true') {
       setIsAuthenticated(true)
-      loadRequests()
+      // Load requests after component mounts
+      setTimeout(() => {
+        loadRequests()
+      }, 100)
+    } else {
+      // Ensure modal shows if not authenticated
+      setIsAuthenticated(false)
     }
   }, [])
 
@@ -410,46 +404,48 @@ export default function AdminOpportunityRequestsPage() {
   // Show password modal if not authenticated
   if (!isAuthenticated) {
     return (
-      <Dialog open={true}>
-        <DialogContent className="sm:max-w-md" onPointerDownOutside={(e) => e.preventDefault()}>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Lock className="h-5 w-5" />
-              Admin Access Required
-            </DialogTitle>
-            <DialogDescription>
-              Please enter the password to access the opportunity requests panel.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handlePasswordSubmit}>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value)
-                    setPasswordError(false)
-                  }}
-                  placeholder="Enter password"
-                  className={passwordError ? 'border-red-500' : ''}
-                  autoFocus
-                />
-                {passwordError && (
-                  <p className="text-sm text-red-500">Incorrect password. Please try again.</p>
-                )}
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Dialog open={true}>
+          <DialogContent className="sm:max-w-md" onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Lock className="h-5 w-5" />
+                Admin Access Required
+              </DialogTitle>
+              <DialogDescription>
+                Please enter the password to access the opportunity requests panel.
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handlePasswordSubmit}>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value)
+                      setPasswordError(false)
+                    }}
+                    placeholder="Enter password"
+                    className={passwordError ? 'border-red-500' : ''}
+                    autoFocus
+                  />
+                  {passwordError && (
+                    <p className="text-sm text-red-500">Incorrect password. Please try again.</p>
+                  )}
+                </div>
               </div>
-            </div>
-            <DialogFooter>
-              <Button type="submit" className="w-full">
-                Access Panel
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+              <DialogFooter>
+                <Button type="submit" className="w-full">
+                  Access Panel
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
     )
   }
 
