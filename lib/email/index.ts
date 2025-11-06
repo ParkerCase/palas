@@ -659,7 +659,7 @@ Manage subscription: ${process.env.NEXT_PUBLIC_APP_URL}/subscription
       
       <p>Please review this request and search for matching opportunities using the admin panel.</p>
       
-      <a href="${process.env.NEXT_PUBLIC_APP_URL}/admin/opportunity-requests" class="button">
+      <a href="https://gov.stroomai.com/admin/opportunity-requests" class="button">
         View Request in Admin Panel
       </a>
       
@@ -694,7 +694,7 @@ ${naicsCodes && naicsCodes.length > 0 ? `NAICS Codes: ${naicsCodes.join(', ')}` 
 
 Please review this request and search for matching opportunities using the admin panel.
 
-View Request: ${process.env.NEXT_PUBLIC_APP_URL}/admin/opportunity-requests
+View Request: https://gov.stroomai.com/admin/opportunity-requests
 
 Request ID: ${requestId}
     `
