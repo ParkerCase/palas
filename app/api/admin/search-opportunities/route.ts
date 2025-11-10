@@ -70,10 +70,22 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Get NAICS codes from profile_data
+    // Get NAICS codes - prefer from request, fallback to company profile
     let naicsCodes: string[] = []
-    if (company.profile_data?.naics_codes) {
+    
+    // First try to get NAICS codes from the opportunity request
+    const { data: requestData } = await supabase
+      .from('opportunity_requests')
+      .select('industry_codes')
+      .eq('id', requestId)
+      .single()
+    
+    if (requestData?.industry_codes && Array.isArray(requestData.industry_codes) && requestData.industry_codes.length > 0) {
+      naicsCodes = requestData.industry_codes
+      console.log('[API] Using NAICS codes from request:', naicsCodes)
+    } else if (company.profile_data?.naics_codes) {
       naicsCodes = company.profile_data.naics_codes
+      console.log('[API] Using NAICS codes from company profile:', naicsCodes)
     }
 
     // Build search query
@@ -94,14 +106,75 @@ export async function POST(request: NextRequest) {
       business_type: company.business_type
     })
 
-    // Perform Brave Search
-    const searchResults = await braveSearchService.searchOpportunities(searchQuery, {
+    // Try multiple search strategies if first one fails
+    let searchResults = await braveSearchService.searchOpportunities(searchQuery, {
       count: 10,
       filterGov: true,
-      freshness: 'month' // Get results from last month
+      freshness: 'month'
     })
 
-    console.log('[API] Brave Search results:', {
+    console.log('[API] Initial Brave Search results:', {
+      total: searchResults.results?.length || 0,
+      hasResults: !!searchResults.results
+    })
+
+    // If no results, try broader search without freshness filter
+    if (searchResults.results.length === 0) {
+      console.log('[API] No results with freshness filter, trying without freshness...')
+      searchResults = await braveSearchService.searchOpportunities(searchQuery, {
+        count: 10,
+        filterGov: true
+      })
+    }
+
+    // If still no results, try without gov filter
+    if (searchResults.results.length === 0) {
+      console.log('[API] No results with gov filter, trying without gov filter...')
+      searchResults = await braveSearchService.searchOpportunities(searchQuery, {
+        count: 20,
+        filterGov: false
+      })
+      // Filter manually after getting results
+      if (searchResults.results.length > 0) {
+        searchResults.results = searchResults.results.filter(result => 
+          result.domain?.includes('.gov') || 
+          result.url.includes('.gov') ||
+          result.title.toLowerCase().includes('government') ||
+          result.title.toLowerCase().includes('contract') ||
+          result.description.toLowerCase().includes('government') ||
+          result.description.toLowerCase().includes('contract')
+        )
+      }
+    }
+
+    // If still no results, try a more generic query
+    if (searchResults.results.length === 0) {
+      console.log('[API] No results with specific query, trying generic government contracts search...')
+      const genericQuery = naicsCodes.length > 0
+        ? `government contracts ${company.industry || ''} NAICS ${naicsCodes.slice(0, 2).join(' ')}`
+        : `government contracts ${company.industry || ''} small business`
+      
+      searchResults = await braveSearchService.searchOpportunities(genericQuery, {
+        count: 20,
+        filterGov: false
+      })
+      
+      // Filter for government-related results
+      if (searchResults.results.length > 0) {
+        searchResults.results = searchResults.results.filter(result => 
+          result.domain?.includes('.gov') || 
+          result.url.includes('.gov') ||
+          result.title.toLowerCase().includes('government') ||
+          result.title.toLowerCase().includes('contract') ||
+          result.description.toLowerCase().includes('government') ||
+          result.description.toLowerCase().includes('contract') ||
+          result.description.toLowerCase().includes('solicitation') ||
+          result.description.toLowerCase().includes('rfp')
+        )
+      }
+    }
+
+    console.log('[API] Final Brave Search results:', {
       total: searchResults.results?.length || 0,
       hasResults: !!searchResults.results
     })
