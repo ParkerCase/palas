@@ -101,11 +101,14 @@ export default function AdminOpportunityRequestsPage() {
       
       // Use API endpoint to bypass RLS restrictions
       const response = await fetch('/api/admin/opportunity-requests')
-      const data = await response.json()
-
+      
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to load requests')
+        const errorData = await response.json()
+        throw new Error(errorData.error || `HTTP ${response.status}: Failed to load requests`)
       }
+      
+      const data = await response.json()
+      console.log('Loaded requests:', data.requests?.length || 0)
 
       setRequests(data.requests || [])
     } catch (error) {

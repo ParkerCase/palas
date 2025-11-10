@@ -9,12 +9,14 @@ export const dynamic = 'force-dynamic'
  */
 export async function GET(request: NextRequest) {
   try {
+    console.log('[API] /api/admin/opportunity-requests called')
+    
     // Use service role client to bypass RLS
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
     
     if (!supabaseServiceKey) {
-      console.error('SUPABASE_SERVICE_ROLE_KEY is not configured')
+      console.log('[API] Service role key not found, using fallback method')
       // Fallback to regular client - will use admin view
       const { createRouteHandlerClient } = await import('@/lib/supabase/server')
       const supabase = createRouteHandlerClient(request)
@@ -26,6 +28,7 @@ export async function GET(request: NextRequest) {
         .order('created_at', { ascending: false })
 
       if (!viewError && viewData) {
+        console.log('[API] Using admin view, found', viewData.length, 'requests')
         // Transform view data to match expected format
         const transformedRequests = (viewData || []).map((req: any) => ({
           id: req.id,
@@ -55,6 +58,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ requests: transformedRequests })
       }
 
+      console.log('[API] Admin view failed, trying direct query:', viewError?.message)
       // Fallback: Query opportunity_requests and join manually
       const { data: directData, error: directError } = await supabase
         .from('opportunity_requests')
@@ -62,12 +66,14 @@ export async function GET(request: NextRequest) {
         .order('created_at', { ascending: false })
       
       if (directError) {
+        console.error('[API] Direct query error:', directError)
         return NextResponse.json(
           { error: 'Failed to fetch requests', details: directError.message },
           { status: 500 }
         )
       }
       
+      console.log('[API] Direct query found', directData?.length || 0, 'requests')
       // Get user and company info separately
       const userIds = [...new Set((directData || []).map((r: any) => r.user_id).filter(Boolean))]
       const companyIds = [...new Set((directData || []).map((r: any) => r.company_id).filter(Boolean))]
@@ -101,6 +107,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ requests: transformedRequests })
     }
 
+    console.log('[API] Using service role key')
     // Use service role client
     const supabase = createClient(supabaseUrl, supabaseServiceKey, {
       auth: {
@@ -116,6 +123,7 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false })
 
     if (!viewError && viewData) {
+      console.log('[API] Using admin view with service role, found', viewData.length, 'requests')
       // Transform view data to match expected format
       const transformedRequests = (viewData || []).map((req: any) => ({
         id: req.id,
@@ -145,6 +153,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ requests: transformedRequests })
     }
 
+    console.log('[API] Admin view failed with service role, trying direct query')
     // Fallback: Query opportunity_requests and join manually
     const { data: requestsData, error } = await supabase
       .from('opportunity_requests')
@@ -152,13 +161,14 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false })
 
     if (error) {
-      console.error('Error fetching opportunity requests:', error)
+      console.error('[API] Error fetching opportunity requests:', error)
       return NextResponse.json(
         { error: 'Failed to fetch requests', details: error.message },
         { status: 500 }
       )
     }
 
+    console.log('[API] Direct query with service role found', requestsData?.length || 0, 'requests')
     // Get user and company info separately
     const userIds = [...new Set((requestsData || []).map((r: any) => r.user_id).filter(Boolean))]
     const companyIds = [...new Set((requestsData || []).map((r: any) => r.company_id).filter(Boolean))]
@@ -192,7 +202,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ requests: transformedRequests })
   } catch (error) {
-    console.error('Error in GET /api/admin/opportunity-requests:', error)
+    console.error('[API] Error in GET /api/admin/opportunity-requests:', error)
     return NextResponse.json(
       { error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
