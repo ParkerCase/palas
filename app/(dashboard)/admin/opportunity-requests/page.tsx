@@ -31,10 +31,16 @@ interface OpportunityRequest {
   user_id: string
   company_id: string
   request_type: string
-  description: string
-  budget_range: string
-  location_preference: string
-  industry_focus: string
+  notes?: string
+  description?: string // Legacy field, use notes instead
+  budget_min?: number
+  budget_max?: number
+  budget_range?: string // Legacy field
+  target_counties?: string[]
+  target_cities?: string[]
+  industry_codes?: string[]
+  location_preference?: string // Legacy field
+  industry_focus?: string // Legacy field
   status: string
   created_at: string
   user_email?: string
@@ -393,7 +399,7 @@ export default function AdminOpportunityRequestsPage() {
 
   const filteredRequests = requests.filter(request => {
     const matchesSearch = 
-      request.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (request.notes || request.description || '')?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       request.user_email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       request.company_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       request.request_type?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -568,12 +574,28 @@ export default function AdminOpportunityRequestsPage() {
                         <h4 className="font-medium text-gray-900 mb-1">
                           {request.request_type.replace('_', ' ')}
                         </h4>
-                        <p className="text-sm text-gray-600 mb-2">
-                          {request.description.substring(0, 100)}...
-                        </p>
+                        {(request.notes || request.description) && (
+                          <p className="text-sm text-gray-600 mb-2">
+                            {(request.notes || request.description || '').substring(0, 100)}
+                            {(request.notes || request.description || '').length > 100 ? '...' : ''}
+                          </p>
+                        )}
                         <div className="flex items-center space-x-4 text-xs text-gray-500">
-                          {request.budget_range && (
-                            <span>Budget: {request.budget_range}</span>
+                          {((request.budget_min || request.budget_max) || request.budget_range) && (
+                            <span>Budget: {
+                              request.budget_min || request.budget_max
+                                ? `$${request.budget_min ? (request.budget_min / 1000).toFixed(0) + 'k' : '0'} - $${request.budget_max ? (request.budget_max / 1000).toFixed(0) + 'k' : '∞'}`
+                                : request.budget_range
+                            }</span>
+                          )}
+                          {request.target_counties && request.target_counties.length > 0 && (
+                            <span>Counties: {request.target_counties.join(', ')}</span>
+                          )}
+                          {request.target_cities && request.target_cities.length > 0 && (
+                            <span>Cities: {request.target_cities.join(', ')}</span>
+                          )}
+                          {request.industry_codes && request.industry_codes.length > 0 && (
+                            <span>NAICS: {request.industry_codes.join(', ')}</span>
                           )}
                           {request.location_preference && (
                             <span>Location: {request.location_preference}</span>
@@ -615,14 +637,43 @@ export default function AdminOpportunityRequestsPage() {
                       <Label className="text-sm font-medium text-gray-600">Request Type</Label>
                       <p className="text-sm">{selectedRequest.request_type.replace('_', ' ')}</p>
                     </div>
-                    <div>
-                      <Label className="text-sm font-medium text-gray-600">Description</Label>
-                      <p className="text-sm">{selectedRequest.description}</p>
-                    </div>
+                    {(selectedRequest.notes || selectedRequest.description) && (
+                      <div>
+                        <Label className="text-sm font-medium text-gray-600">Description / Notes</Label>
+                        <p className="text-sm">{selectedRequest.notes || selectedRequest.description}</p>
+                      </div>
+                    )}
+                    {(selectedRequest.budget_min || selectedRequest.budget_max) && (
+                      <div>
+                        <Label className="text-sm font-medium text-gray-600">Budget Range</Label>
+                        <p className="text-sm">
+                          ${selectedRequest.budget_min ? selectedRequest.budget_min.toLocaleString() : 'N/A'} - 
+                          ${selectedRequest.budget_max ? selectedRequest.budget_max.toLocaleString() : 'N/A'}
+                        </p>
+                      </div>
+                    )}
                     {selectedRequest.budget_range && (
                       <div>
                         <Label className="text-sm font-medium text-gray-600">Budget Range</Label>
                         <p className="text-sm">{selectedRequest.budget_range}</p>
+                      </div>
+                    )}
+                    {selectedRequest.target_counties && selectedRequest.target_counties.length > 0 && (
+                      <div>
+                        <Label className="text-sm font-medium text-gray-600">Target Counties</Label>
+                        <p className="text-sm">{selectedRequest.target_counties.join(', ')}</p>
+                      </div>
+                    )}
+                    {selectedRequest.target_cities && selectedRequest.target_cities.length > 0 && (
+                      <div>
+                        <Label className="text-sm font-medium text-gray-600">Target Cities</Label>
+                        <p className="text-sm">{selectedRequest.target_cities.join(', ')}</p>
+                      </div>
+                    )}
+                    {selectedRequest.industry_codes && selectedRequest.industry_codes.length > 0 && (
+                      <div>
+                        <Label className="text-sm font-medium text-gray-600">NAICS Codes</Label>
+                        <p className="text-sm">{selectedRequest.industry_codes.join(', ')}</p>
                       </div>
                     )}
                     {selectedRequest.location_preference && (
