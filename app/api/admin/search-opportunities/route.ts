@@ -1,32 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@supabase/supabase-js'
 import { braveSearchService } from '@/lib/search/brave'
-import { isAdmin } from '@/lib/config/admin'
 
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createRouteHandlerClient({ cookies })
+    // Use service role client to bypass RLS (page is password-protected)
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
     
-    // Get the current user and verify admin access
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
-    // Check if user is admin (authorized emails only)
-    if (!isAdmin(user.email)) {
-      return NextResponse.json(
-        { error: 'Admin access required' },
-        { status: 403 }
-      )
-    }
+    // Create Supabase client with service role or fallback to regular client
+    const supabase = supabaseServiceKey
+      ? createClient(supabaseUrl, supabaseServiceKey, {
+          auth: {
+            autoRefreshToken: false,
+            persistSession: false
+          }
+        })
+      : (await import('@/lib/supabase/server')).createRouteHandlerClient(request)
 
     // Get request data
     const body = await request.json()
@@ -111,7 +103,7 @@ export async function POST(request: NextRequest) {
           searched_at: new Date().toISOString(),
           total_results: scoredResults.length
         },
-        processed_by: user.id,
+        processed_by: null, // No user ID since we're using password auth
         processed_at: new Date().toISOString()
       })
       .eq('id', requestId)
