@@ -338,7 +338,6 @@ export default function AdminOpportunityRequestsPage() {
           deadline: newOpportunity.deadline,
           source: newOpportunity.source,
           status: 'active',
-          created_by: user?.id,
           created_at: new Date().toISOString()
         })
         .select()
