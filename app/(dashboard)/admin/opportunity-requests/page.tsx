@@ -251,7 +251,16 @@ export default function AdminOpportunityRequestsPage() {
           })
         }
       } else {
-        throw new Error(data.error || data.details || 'Failed to search opportunities')
+        // Handle rate limit errors specifically
+        if (response.status === 429) {
+          toast({
+            title: 'Rate Limit Exceeded',
+            description: data.details || 'Please wait a moment and try again. Brave Search free plan allows 1 request per second.',
+            variant: 'destructive'
+          })
+        } else {
+          throw new Error(data.error || data.details || 'Failed to search opportunities')
+        }
       }
     } catch (error) {
       console.error('Error searching opportunities:', error)

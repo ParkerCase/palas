@@ -106,72 +106,89 @@ export async function POST(request: NextRequest) {
       business_type: company.business_type
     })
 
-    // Try multiple search strategies if first one fails
-    let searchResults = await braveSearchService.searchOpportunities(searchQuery, {
-      count: 10,
-      filterGov: true,
-      freshness: 'month'
-    })
+    // Helper function to add delay (respect rate limits)
+    const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
-    console.log('[API] Initial Brave Search results:', {
-      total: searchResults.results?.length || 0,
-      hasResults: !!searchResults.results
-    })
+    // Try search with error handling for rate limits
+    let searchResults: any = { results: [] }
+    let lastError: Error | null = null
 
-    // If no results, try broader search without freshness filter
-    if (searchResults.results.length === 0) {
-      console.log('[API] No results with freshness filter, trying without freshness...')
+    try {
+      // First attempt: specific query with filters
       searchResults = await braveSearchService.searchOpportunities(searchQuery, {
-        count: 10,
-        filterGov: true
+        count: 20, // Get more results initially
+        filterGov: false, // Start without gov filter to get more results
+        freshness: undefined // Don't restrict by freshness initially
       })
-    }
 
-    // If still no results, try without gov filter
-    if (searchResults.results.length === 0) {
-      console.log('[API] No results with gov filter, trying without gov filter...')
-      searchResults = await braveSearchService.searchOpportunities(searchQuery, {
-        count: 20,
-        filterGov: false
+      console.log('[API] Initial Brave Search results:', {
+        total: searchResults.results?.length || 0,
+        hasResults: !!searchResults.results
       })
-      // Filter manually after getting results
-      if (searchResults.results.length > 0) {
-        searchResults.results = searchResults.results.filter(result => 
-          result.domain?.includes('.gov') || 
-          result.url.includes('.gov') ||
-          result.title.toLowerCase().includes('government') ||
-          result.title.toLowerCase().includes('contract') ||
-          result.description.toLowerCase().includes('government') ||
-          result.description.toLowerCase().includes('contract')
-        )
-      }
-    }
 
-    // If still no results, try a more generic query
-    if (searchResults.results.length === 0) {
-      console.log('[API] No results with specific query, trying generic government contracts search...')
-      const genericQuery = naicsCodes.length > 0
-        ? `government contracts ${company.industry || ''} NAICS ${naicsCodes.slice(0, 2).join(' ')}`
-        : `government contracts ${company.industry || ''} small business`
-      
-      searchResults = await braveSearchService.searchOpportunities(genericQuery, {
-        count: 20,
-        filterGov: false
-      })
-      
       // Filter for government-related results
       if (searchResults.results.length > 0) {
-        searchResults.results = searchResults.results.filter(result => 
+        searchResults.results = searchResults.results.filter((result: any) => 
           result.domain?.includes('.gov') || 
           result.url.includes('.gov') ||
           result.title.toLowerCase().includes('government') ||
           result.title.toLowerCase().includes('contract') ||
+          result.title.toLowerCase().includes('solicitation') ||
+          result.title.toLowerCase().includes('rfp') ||
+          result.title.toLowerCase().includes('procurement') ||
           result.description.toLowerCase().includes('government') ||
           result.description.toLowerCase().includes('contract') ||
           result.description.toLowerCase().includes('solicitation') ||
           result.description.toLowerCase().includes('rfp')
         )
       }
+
+      // If no results after filtering, try a broader query (with delay to respect rate limits)
+      if (searchResults.results.length === 0) {
+        console.log('[API] No results after filtering, trying broader query after delay...')
+        await delay(2000) // Wait 2 seconds to respect rate limit (1 req/sec for free plan)
+        
+        const broaderQuery = naicsCodes.length > 0
+          ? `government contracts ${company.industry || ''} NAICS ${naicsCodes.slice(0, 2).join(' ')}`
+          : `government contracts ${company.industry || ''} small business opportunities`
+        
+        searchResults = await braveSearchService.searchOpportunities(broaderQuery, {
+          count: 20,
+          filterGov: false
+        })
+        
+        // Filter for government-related results
+        if (searchResults.results.length > 0) {
+          searchResults.results = searchResults.results.filter((result: any) => 
+            result.domain?.includes('.gov') || 
+            result.url.includes('.gov') ||
+            result.title.toLowerCase().includes('government') ||
+            result.title.toLowerCase().includes('contract') ||
+            result.description.toLowerCase().includes('government') ||
+            result.description.toLowerCase().includes('contract') ||
+            result.description.toLowerCase().includes('solicitation') ||
+            result.description.toLowerCase().includes('rfp')
+          )
+        }
+      }
+    } catch (error: any) {
+      lastError = error
+      console.error('[API] Brave Search error:', error)
+      
+      // Check if it's a rate limit error
+      if (error.message?.includes('429') || error.message?.includes('RATE_LIMITED')) {
+        return NextResponse.json(
+          { 
+            error: 'Rate limit exceeded',
+            details: 'Brave Search API rate limit reached. Please wait a moment and try again. Free plan allows 1 request per second.',
+            retry_after: 2
+          },
+          { status: 429 }
+        )
+      }
+      
+      // Re-throw other errors
+      throw error
     }
 
     console.log('[API] Final Brave Search results:', {
