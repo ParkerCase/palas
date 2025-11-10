@@ -197,13 +197,25 @@ export default function AdminOpportunityRequestsPage() {
   }
 
   const handleSearchOpportunities = async () => {
-    if (!selectedRequest) return
+    if (!selectedRequest) {
+      toast({
+        title: 'Error',
+        description: 'Please select a request first',
+        variant: 'destructive'
+      })
+      return
+    }
 
     setSearchingOpportunities(true)
     setSearchResults([])
     setSelectedOpportunities(new Set())
 
     try {
+      console.log('Searching opportunities for:', {
+        requestId: selectedRequest.id,
+        companyId: selectedRequest.company_id
+      })
+
       const response = await fetch('/api/admin/search-opportunities', {
         method: 'POST',
         headers: {
@@ -215,17 +227,31 @@ export default function AdminOpportunityRequestsPage() {
         })
       })
 
+      console.log('Search response status:', response.status)
+
       const data = await response.json()
+      console.log('Search response data:', data)
 
       if (response.ok) {
-        setSearchResults(data.results || [])
+        const results = data.results || []
+        console.log('Setting search results:', results.length)
+        setSearchResults(results)
         setBraveSearchQuery(data.query || '')
-        toast({
-          title: 'Search Complete',
-          description: `Found ${data.results?.length || 0} opportunities`
-        })
+        
+        if (results.length === 0) {
+          toast({
+            title: 'No Results',
+            description: 'No opportunities found. Try adjusting the search criteria.',
+            variant: 'default'
+          })
+        } else {
+          toast({
+            title: 'Search Complete',
+            description: `Found ${results.length} opportunities`
+          })
+        }
       } else {
-        throw new Error(data.error || 'Failed to search opportunities')
+        throw new Error(data.error || data.details || 'Failed to search opportunities')
       }
     } catch (error) {
       console.error('Error searching opportunities:', error)

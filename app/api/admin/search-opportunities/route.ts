@@ -6,6 +6,8 @@ export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('[API] /api/admin/search-opportunities called')
+    
     // Use service role client to bypass RLS (page is password-protected)
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -24,6 +26,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { requestId, companyId } = body
 
+    console.log('[API] Request data:', { requestId, companyId })
+
     if (!requestId || !companyId) {
       return NextResponse.json(
         { error: 'Request ID and Company ID are required' },
@@ -39,11 +43,14 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (companyError || !company) {
+      console.error('[API] Company not found:', companyError)
       return NextResponse.json(
-        { error: 'Company not found' },
+        { error: 'Company not found', details: companyError?.message },
         { status: 404 }
       )
     }
+
+    console.log('[API] Company found:', company.name)
 
     // Extract location from headquarters_address
     let city = ''
@@ -78,6 +85,15 @@ export async function POST(request: NextRequest) {
       business_type: company.business_type || ''
     })
 
+    console.log('[API] Search query:', searchQuery)
+    console.log('[API] Company data:', {
+      industry: company.industry,
+      city,
+      state,
+      naicsCodes,
+      business_type: company.business_type
+    })
+
     // Perform Brave Search
     const searchResults = await braveSearchService.searchOpportunities(searchQuery, {
       count: 10,
@@ -85,11 +101,18 @@ export async function POST(request: NextRequest) {
       freshness: 'month' // Get results from last month
     })
 
+    console.log('[API] Brave Search results:', {
+      total: searchResults.results?.length || 0,
+      hasResults: !!searchResults.results
+    })
+
     // Score and rank results
-    const scoredResults = braveSearchService.scoreResults(searchResults.results, {
+    const scoredResults = braveSearchService.scoreResults(searchResults.results || [], {
       industry: company.industry || '',
       naics_codes: naicsCodes
     })
+
+    console.log('[API] Scored results:', scoredResults.length)
 
     // Update the opportunity request with search results
     const { error: updateError } = await supabase
