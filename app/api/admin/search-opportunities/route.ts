@@ -156,10 +156,14 @@ export async function POST(request: NextRequest) {
     })
 
     console.log('[API] Search query:', searchQuery)
+    console.log('[API] Location data:', {
+      searchCity,
+      searchState,
+      searchCounties,
+      searchCities
+    })
     console.log('[API] Company data:', {
       industry: company.industry,
-      city,
-      state,
       naicsCodes,
       business_type: company.business_type
     })
@@ -172,8 +176,37 @@ export async function POST(request: NextRequest) {
     let lastError: Error | null = null
 
     try {
-      // First attempt: specific query with filters
-      searchResults = await braveSearchService.searchOpportunities(searchQuery, {
+      // First attempt: try a simpler, more focused query
+      // Build a simpler query without all the redundancy
+      const simpleQueryParts: string[] = []
+      
+      // Location (just one city and state)
+      if (searchCities.length > 0) {
+        simpleQueryParts.push(searchCities[0])
+      } else if (searchCounties.length > 0) {
+        simpleQueryParts.push(searchCounties[0])
+      }
+      if (searchState) {
+        simpleQueryParts.push(searchState)
+      }
+      
+      // Add opportunity keywords
+      simpleQueryParts.push('government contract', 'solicitation')
+      
+      // Add industry
+      if (company.industry) {
+        simpleQueryParts.push(company.industry)
+      }
+      
+      // Add NAICS if available
+      if (naicsCodes.length > 0) {
+        simpleQueryParts.push('NAICS', naicsCodes[0])
+      }
+      
+      const simpleQuery = simpleQueryParts.join(' ')
+      console.log('[API] Trying simple query first:', simpleQuery)
+      
+      searchResults = await braveSearchService.searchOpportunities(simpleQuery, {
         count: 20, // Get more results initially
         filterGov: false, // Start without gov filter to get more results
         freshness: undefined // Don't restrict by freshness initially
@@ -268,35 +301,79 @@ export async function POST(request: NextRequest) {
         })
       }
 
-      // If no results after filtering, try a broader query (with delay to respect rate limits)
+      // If no results after filtering, try even simpler queries (with delay to respect rate limits)
       if (searchResults.results.length === 0) {
-        console.log('[API] No results after filtering, trying broader query after delay...')
+        console.log('[API] No results after filtering, trying simpler queries after delay...')
         await delay(2000) // Wait 2 seconds to respect rate limit (1 req/sec for free plan)
         
-        // Build broader query with location emphasis
-        const locationParts: string[] = []
-        if (searchCities.length > 0) {
-          locationParts.push(...searchCities.slice(0, 2))
+        // Try query with just location and NAICS
+        if (naicsCodes.length > 0 && searchState) {
+          const naicsQuery = `government contract ${searchState} NAICS ${naicsCodes[0]}`
+          console.log('[API] Trying NAICS-focused query:', naicsQuery)
+          
+          searchResults = await braveSearchService.searchOpportunities(naicsQuery, {
+            count: 20,
+            filterGov: false
+          })
+          
+          // Filter results
+          if (searchResults.results.length > 0) {
+            searchResults.results = searchResults.results.filter((result: any) => {
+              const url = result.url.toLowerCase()
+              const title = result.title.toLowerCase()
+              const desc = result.description.toLowerCase()
+              const combined = `${title} ${desc}`.toLowerCase()
+              
+              // Exclude main pages and other states
+              if (url.match(/\/home|\/search|\/browse|\/index/)) return false
+              if (searchState?.toLowerCase() === 'california') {
+                if (combined.includes('florida') || combined.includes('fl ') && !combined.includes('california')) {
+                  return false
+                }
+              }
+              
+              // Require opportunity indicators
+              return (url.includes('/opportunity/') || url.includes('/solicitation/') || 
+                      url.includes('/contract/') || url.includes('/rfp/') ||
+                      (url.includes('.gov') && (combined.includes('solicitation') || combined.includes('rfp'))))
+            })
+          }
         }
-        if (searchCounties.length > 0) {
-          locationParts.push(...searchCounties.slice(0, 2))
+        
+        // If still no results, try location-only query
+        if (searchResults.results.length === 0 && searchState) {
+          await delay(2000)
+          const locationQuery = `government contract ${searchState} ${company.industry || 'construction'}`
+          console.log('[API] Trying location-only query:', locationQuery)
+          
+          searchResults = await braveSearchService.searchOpportunities(locationQuery, {
+            count: 20,
+            filterGov: false
+          })
+          
+          // Filter results
+          if (searchResults.results.length > 0) {
+            searchResults.results = searchResults.results.filter((result: any) => {
+              const url = result.url.toLowerCase()
+              const title = result.title.toLowerCase()
+              const desc = result.description.toLowerCase()
+              const combined = `${title} ${desc}`.toLowerCase()
+              
+              // Exclude main pages and other states
+              if (url.match(/\/home|\/search|\/browse|\/index/)) return false
+              if (searchState?.toLowerCase() === 'california') {
+                if (combined.includes('florida') || combined.includes('fl ') && !combined.includes('california')) {
+                  return false
+                }
+              }
+              
+              // Require opportunity indicators
+              return (url.includes('/opportunity/') || url.includes('/solicitation/') || 
+                      url.includes('/contract/') || url.includes('/rfp/') ||
+                      (url.includes('.gov') && (combined.includes('solicitation') || combined.includes('rfp'))))
+            })
+          }
         }
-        if (searchState) {
-          locationParts.push(searchState)
-        }
-        
-        const locationStr = locationParts.length > 0 ? locationParts.join(' ') + ' ' : ''
-        
-        const broaderQuery = naicsCodes.length > 0
-          ? `government contract opportunity solicitation ${locationStr}${company.industry || ''} NAICS ${naicsCodes.slice(0, 2).join(' ')}`
-          : `government contract opportunity solicitation ${locationStr}${company.industry || ''} small business`
-        
-        console.log('[API] Broader query:', broaderQuery)
-        
-        searchResults = await braveSearchService.searchOpportunities(broaderQuery, {
-          count: 20,
-          filterGov: false
-        })
         
         // Filter for actual contract opportunities (not informational pages)
         // Apply same filtering as initial search, including location filtering

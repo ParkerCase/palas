@@ -167,22 +167,54 @@ export class BraveSearchService {
     cities?: string[]
   }): string {
     // Start with opportunity-focused keywords
-    const parts: string[] = ['government contract opportunity', 'solicitation', 'RFP']
+    const parts: string[] = ['government contract opportunity', 'solicitation']
 
-    // Add location FIRST (most important for filtering)
-    // Prioritize cities, then counties, then city/state
+    // Build location - avoid duplicates
+    const locationParts: string[] = []
+    
+    // Prioritize cities from request
     if (companyProfile.cities && companyProfile.cities.length > 0) {
-      parts.push(...companyProfile.cities.slice(0, 2)) // Add up to 2 cities
+      // Add first city only (avoid duplicates)
+      const firstCity = companyProfile.cities[0]
+      if (!locationParts.includes(firstCity)) {
+        locationParts.push(firstCity)
+      }
     }
-    if (companyProfile.counties && companyProfile.counties.length > 0) {
-      parts.push(...companyProfile.counties.slice(0, 2)) // Add up to 2 counties
+    
+    // Add state (but not if we already have cities/counties that imply the state)
+    if (companyProfile.state) {
+      // Only add state if it's not redundant
+      const stateLower = companyProfile.state.toLowerCase()
+      const isCalifornia = stateLower === 'california' || stateLower === 'ca'
+      const hasCaliforniaLocation = locationParts.some(loc => 
+        loc.toLowerCase().includes('california') || 
+        loc.toLowerCase().includes('los angeles') ||
+        loc.toLowerCase().includes('orange')
+      )
+      
+      if (!isCalifornia || !hasCaliforniaLocation) {
+        if (!locationParts.includes(companyProfile.state)) {
+          locationParts.push(companyProfile.state)
+        }
+      }
     }
-    if (companyProfile.city && companyProfile.state) {
-      parts.push(companyProfile.city)
-      parts.push(companyProfile.state)
-    } else if (companyProfile.state) {
-      parts.push(companyProfile.state)
+    
+    // Add counties only if we don't have cities
+    if (locationParts.length === 0 && companyProfile.counties && companyProfile.counties.length > 0) {
+      locationParts.push(companyProfile.counties[0]) // Just first county
     }
+    
+    // Fallback to city/state if no request location
+    if (locationParts.length === 0) {
+      if (companyProfile.city && companyProfile.state) {
+        locationParts.push(companyProfile.city, companyProfile.state)
+      } else if (companyProfile.state) {
+        locationParts.push(companyProfile.state)
+      }
+    }
+    
+    // Add location to query
+    parts.push(...locationParts)
 
     // Add industry
     if (companyProfile.industry) {
@@ -192,11 +224,12 @@ export class BraveSearchService {
     // Add NAICS codes
     if (companyProfile.naics_codes && companyProfile.naics_codes.length > 0) {
       parts.push('NAICS')
-      parts.push(...companyProfile.naics_codes.slice(0, 3)) // Limit to first 3 codes
+      parts.push(...companyProfile.naics_codes.slice(0, 2)) // Limit to 2 codes
     }
 
-    // Add business type keywords
-    if (companyProfile.business_type) {
+    // Add business type keywords (only if not redundant with industry)
+    if (companyProfile.business_type && 
+        companyProfile.business_type.toLowerCase() !== companyProfile.industry?.toLowerCase()) {
       parts.push(companyProfile.business_type)
     }
 
