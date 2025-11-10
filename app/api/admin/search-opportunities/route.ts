@@ -126,21 +126,50 @@ export async function POST(request: NextRequest) {
         hasResults: !!searchResults.results
       })
 
-      // Filter for government-related results
+      // Filter for actual contract opportunities (not informational pages)
       if (searchResults.results.length > 0) {
-        searchResults.results = searchResults.results.filter((result: any) => 
-          result.domain?.includes('.gov') || 
-          result.url.includes('.gov') ||
-          result.title.toLowerCase().includes('government') ||
-          result.title.toLowerCase().includes('contract') ||
-          result.title.toLowerCase().includes('solicitation') ||
-          result.title.toLowerCase().includes('rfp') ||
-          result.title.toLowerCase().includes('procurement') ||
-          result.description.toLowerCase().includes('government') ||
-          result.description.toLowerCase().includes('contract') ||
-          result.description.toLowerCase().includes('solicitation') ||
-          result.description.toLowerCase().includes('rfp')
-        )
+        searchResults.results = searchResults.results.filter((result: any) => {
+          const url = result.url.toLowerCase()
+          const title = result.title.toLowerCase()
+          const desc = result.description.toLowerCase()
+          const combined = `${title} ${desc}`.toLowerCase()
+          
+          // Exclude informational/educational pages
+          const excludeKeywords = [
+            'blog', 'article', 'guide', 'how to', 'understanding', 
+            'what are', '101', 'decoded', 'top codes', 'list of',
+            'importance of', 'why they matter', 'naics codes by domain'
+          ]
+          if (excludeKeywords.some(kw => combined.includes(kw))) {
+            return false
+          }
+          
+          // Prioritize actual opportunity sites
+          const opportunitySites = [
+            'sam.gov', 'beta.sam.gov', 'grants.gov', 'usaspending.gov',
+            'contracts.gov', 'fbo.gov', 'govtribe.com', 'governmentcontracts.us'
+          ]
+          if (opportunitySites.some(site => url.includes(site))) {
+            return true
+          }
+          
+          // Look for opportunity indicators in .gov domains
+          if (url.includes('.gov')) {
+            const opportunityIndicators = [
+              'solicitation', 'rfp', 'rfq', 'contract opportunity',
+              'pre-solicitation', 'sources sought', 'notice id',
+              'opportunity id', 'award id', '/opportunity/', '/solicitation/'
+            ]
+            if (opportunityIndicators.some(ind => combined.includes(ind) || url.includes(ind))) {
+              return true
+            }
+          }
+          
+          // Fallback: government-related with contract keywords
+          return (url.includes('.gov') || url.includes('.mil')) &&
+                 (combined.includes('contract') || combined.includes('solicitation') ||
+                  combined.includes('rfp') || combined.includes('rfq'))
+        })
       }
 
       // If no results after filtering, try a broader query (with delay to respect rate limits)
@@ -157,18 +186,50 @@ export async function POST(request: NextRequest) {
           filterGov: false
         })
         
-        // Filter for government-related results
+        // Filter for actual contract opportunities (not informational pages)
         if (searchResults.results.length > 0) {
-          searchResults.results = searchResults.results.filter((result: any) => 
-            result.domain?.includes('.gov') || 
-            result.url.includes('.gov') ||
-            result.title.toLowerCase().includes('government') ||
-            result.title.toLowerCase().includes('contract') ||
-            result.description.toLowerCase().includes('government') ||
-            result.description.toLowerCase().includes('contract') ||
-            result.description.toLowerCase().includes('solicitation') ||
-            result.description.toLowerCase().includes('rfp')
-          )
+          searchResults.results = searchResults.results.filter((result: any) => {
+            const url = result.url.toLowerCase()
+            const title = result.title.toLowerCase()
+            const desc = result.description.toLowerCase()
+            const combined = `${title} ${desc}`.toLowerCase()
+            
+            // Exclude informational/educational pages
+            const excludeKeywords = [
+              'blog', 'article', 'guide', 'how to', 'understanding', 
+              'what are', '101', 'decoded', 'top codes', 'list of',
+              'importance of', 'why they matter', 'naics codes by domain'
+            ]
+            if (excludeKeywords.some(kw => combined.includes(kw))) {
+              return false
+            }
+            
+            // Prioritize actual opportunity sites
+            const opportunitySites = [
+              'sam.gov', 'beta.sam.gov', 'grants.gov', 'usaspending.gov',
+              'contracts.gov', 'fbo.gov', 'govtribe.com', 'governmentcontracts.us'
+            ]
+            if (opportunitySites.some(site => url.includes(site))) {
+              return true
+            }
+            
+            // Look for opportunity indicators in .gov domains
+            if (url.includes('.gov')) {
+              const opportunityIndicators = [
+                'solicitation', 'rfp', 'rfq', 'contract opportunity',
+                'pre-solicitation', 'sources sought', 'notice id',
+                'opportunity id', 'award id', '/opportunity/', '/solicitation/'
+              ]
+              if (opportunityIndicators.some(ind => combined.includes(ind) || url.includes(ind))) {
+                return true
+              }
+            }
+            
+            // Fallback: government-related with contract keywords
+            return (url.includes('.gov') || url.includes('.mil')) &&
+                   (combined.includes('contract') || combined.includes('solicitation') ||
+                    combined.includes('rfp') || combined.includes('rfq'))
+          })
         }
       }
     } catch (error: any) {

@@ -117,19 +117,27 @@ export class BraveSearchService {
       // Filter for government-related results if requested
       let filteredResults = results
       if (filterGov) {
-        // First, try to get .gov results
-        const govResults = results.filter(result => 
-          result.domain?.includes(".gov") || result.url.includes(".gov")
+        // First, prioritize actual opportunity sites
+        const opportunitySites = results.filter(result => 
+          this.isActualOpportunity(result)
         )
         
-        // If we have .gov results, use those. Otherwise, use all results with contract keywords
-        if (govResults.length > 0) {
-          filteredResults = govResults
+        if (opportunitySites.length > 0) {
+          filteredResults = opportunitySites
         } else {
-          // If no .gov results, keep results with contract keywords
-          filteredResults = results.filter(result => 
-            this.isGovernmentRelated(result)
+          // Fallback: get .gov results
+          const govResults = results.filter(result => 
+            result.domain?.includes(".gov") || result.url.includes(".gov")
           )
+          
+          if (govResults.length > 0) {
+            filteredResults = govResults
+          } else {
+            // Last resort: use all results with contract keywords
+            filteredResults = results.filter(result => 
+              this.isGovernmentRelated(result)
+            )
+          }
         }
       }
 
@@ -147,6 +155,7 @@ export class BraveSearchService {
 
   /**
    * Build a dynamic search query from company profile
+   * Focuses on actual contract opportunities, not informational pages
    */
   buildCompanyQuery(companyProfile: {
     industry: string
@@ -155,7 +164,8 @@ export class BraveSearchService {
     naics_codes?: string[]
     business_type?: string
   }): string {
-    const parts: string[] = ['government contracts']
+    // Start with opportunity-focused keywords
+    const parts: string[] = ['government contract opportunity', 'solicitation', 'RFP']
 
     // Add industry
     if (companyProfile.industry) {
@@ -182,6 +192,89 @@ export class BraveSearchService {
     }
 
     return parts.join(' ')
+  }
+
+  /**
+   * Check if a result is an actual contract opportunity (not informational)
+   */
+  private isActualOpportunity(result: BraveSearchResult): boolean {
+    const opportunityDomains = [
+      'sam.gov',
+      'beta.sam.gov',
+      'grants.gov',
+      'usaspending.gov',
+      'contracts.gov',
+      'fbo.gov',
+      'govtribe.com',
+      'governmentcontracts.us'
+    ]
+    
+    const opportunityPaths = [
+      '/opportunity/',
+      '/solicitation/',
+      '/rfp/',
+      '/rfq/',
+      '/contract/',
+      '/award/',
+      '/notice/',
+      '/pre-solicitation',
+      '/sources-sought'
+    ]
+    
+    const excludeKeywords = [
+      'blog',
+      'article',
+      'guide',
+      'how to',
+      'understanding',
+      'what are',
+      '101',
+      'decoded',
+      'top codes',
+      'list of',
+      'importance of',
+      'why they matter'
+    ]
+
+    const url = result.url.toLowerCase()
+    const title = result.title.toLowerCase()
+    const description = result.description.toLowerCase()
+    const combinedText = `${title} ${description}`.toLowerCase()
+
+    // Exclude informational/educational pages
+    if (excludeKeywords.some(keyword => combinedText.includes(keyword))) {
+      return false
+    }
+
+    // Check for opportunity domains
+    if (opportunityDomains.some(domain => url.includes(domain))) {
+      return true
+    }
+
+    // Check for opportunity paths in URL
+    if (opportunityPaths.some(path => url.includes(path))) {
+      return true
+    }
+
+    // Check for .gov domains with opportunity indicators
+    if (url.includes('.gov')) {
+      const opportunityIndicators = [
+        'solicitation',
+        'rfp',
+        'rfq',
+        'contract opportunity',
+        'pre-solicitation',
+        'sources sought',
+        'notice id',
+        'opportunity id',
+        'award id'
+      ]
+      if (opportunityIndicators.some(indicator => combinedText.includes(indicator))) {
+        return true
+      }
+    }
+
+    return false
   }
 
   /**
