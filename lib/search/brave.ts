@@ -163,21 +163,30 @@ export class BraveSearchService {
     state?: string
     naics_codes?: string[]
     business_type?: string
+    counties?: string[]
+    cities?: string[]
   }): string {
     // Start with opportunity-focused keywords
     const parts: string[] = ['government contract opportunity', 'solicitation', 'RFP']
 
-    // Add industry
-    if (companyProfile.industry) {
-      parts.push(companyProfile.industry)
+    // Add location FIRST (most important for filtering)
+    // Prioritize cities, then counties, then city/state
+    if (companyProfile.cities && companyProfile.cities.length > 0) {
+      parts.push(...companyProfile.cities.slice(0, 2)) // Add up to 2 cities
     }
-
-    // Add location (city AND state)
+    if (companyProfile.counties && companyProfile.counties.length > 0) {
+      parts.push(...companyProfile.counties.slice(0, 2)) // Add up to 2 counties
+    }
     if (companyProfile.city && companyProfile.state) {
       parts.push(companyProfile.city)
       parts.push(companyProfile.state)
     } else if (companyProfile.state) {
       parts.push(companyProfile.state)
+    }
+
+    // Add industry
+    if (companyProfile.industry) {
+      parts.push(companyProfile.industry)
     }
 
     // Add NAICS codes
@@ -196,6 +205,7 @@ export class BraveSearchService {
 
   /**
    * Check if a result is an actual contract opportunity (not informational)
+   * Also excludes main site pages, only includes individual opportunity pages
    */
   private isActualOpportunity(result: BraveSearchResult): boolean {
     const opportunityDomains = [
@@ -218,7 +228,31 @@ export class BraveSearchService {
       '/award/',
       '/notice/',
       '/pre-solicitation',
-      '/sources-sought'
+      '/sources-sought',
+      '/view/',
+      '/details/',
+      '/contract-opportunity/',
+      '/solicitation-details/'
+    ]
+    
+    // Exclude main site pages (homepage, search, browse, etc.)
+    const excludePaths = [
+      '/home',
+      '/search',
+      '/browse',
+      '/index',
+      '/main',
+      '/about',
+      '/contact',
+      '/help',
+      '/faq',
+      '/blog',
+      '/news',
+      '/resources',
+      '/guides',
+      '/naics-codes',
+      '/top-codes',
+      '/list'
     ]
     
     const excludeKeywords = [
@@ -233,7 +267,12 @@ export class BraveSearchService {
       'top codes',
       'list of',
       'importance of',
-      'why they matter'
+      'why they matter',
+      'naics codes by domain',
+      'main page',
+      'homepage',
+      'browse opportunities',
+      'search opportunities'
     ]
 
     const url = result.url.toLowerCase()
@@ -246,18 +285,42 @@ export class BraveSearchService {
       return false
     }
 
-    // Check for opportunity domains
-    if (opportunityDomains.some(domain => url.includes(domain))) {
-      return true
+    // Exclude main site pages (homepage, search pages, etc.)
+    if (excludePaths.some(path => url.includes(path) && !url.match(/\/opportunity\/|\/solicitation\/|\/rfp\/|\/contract\//))) {
+      return false
     }
 
-    // Check for opportunity paths in URL
+    // Check for opportunity domains with specific opportunity paths
+    if (opportunityDomains.some(domain => url.includes(domain))) {
+      // For known opportunity sites, require a specific opportunity path
+      if (url.includes('sam.gov') || url.includes('beta.sam.gov')) {
+        // SAM.gov - look for opportunity IDs or specific paths
+        if (url.match(/\/opportunities\/|\/entity\/|\/view\/|\/award\/|\/contract\/|\/notice\//) || 
+            url.match(/\/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/)) {
+          return true
+        }
+        return false // Exclude main SAM.gov pages
+      }
+      if (url.includes('governmentcontracts.us')) {
+        // Must have a specific opportunity path
+        if (opportunityPaths.some(path => url.includes(path)) || url.match(/\/contract\/|\/opportunity\//)) {
+          return true
+        }
+        return false // Exclude main site pages
+      }
+      // For other domains, allow if they have opportunity paths
+      if (opportunityPaths.some(path => url.includes(path))) {
+        return true
+      }
+    }
+
+    // Check for opportunity paths in URL (individual opportunity pages)
     if (opportunityPaths.some(path => url.includes(path))) {
       return true
     }
 
-    // Check for .gov domains with opportunity indicators
-    if (url.includes('.gov')) {
+    // Check for .gov domains with opportunity indicators (but not main pages)
+    if (url.includes('.gov') && !url.match(/\/$|\/index|\/home|\/search|\/browse/)) {
       const opportunityIndicators = [
         'solicitation',
         'rfp',
@@ -267,10 +330,15 @@ export class BraveSearchService {
         'sources sought',
         'notice id',
         'opportunity id',
-        'award id'
+        'award id',
+        'contract number',
+        'solicitation number'
       ]
       if (opportunityIndicators.some(indicator => combinedText.includes(indicator))) {
-        return true
+        // Make sure it's not a main listing page
+        if (!url.match(/\/list|\/search|\/browse|\/index/)) {
+          return true
+        }
       }
     }
 

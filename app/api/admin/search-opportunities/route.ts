@@ -70,16 +70,15 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Get NAICS codes - prefer from request, fallback to company profile
-    let naicsCodes: string[] = []
-    
-    // First try to get NAICS codes from the opportunity request
+    // Get request data including location preferences and NAICS codes
     const { data: requestData } = await supabase
       .from('opportunity_requests')
-      .select('industry_codes')
+      .select('industry_codes, target_counties, target_cities')
       .eq('id', requestId)
       .single()
     
+    // Get NAICS codes - prefer from request, fallback to company profile
+    let naicsCodes: string[] = []
     if (requestData?.industry_codes && Array.isArray(requestData.industry_codes) && requestData.industry_codes.length > 0) {
       naicsCodes = requestData.industry_codes
       console.log('[API] Using NAICS codes from request:', naicsCodes)
@@ -88,13 +87,72 @@ export async function POST(request: NextRequest) {
       console.log('[API] Using NAICS codes from company profile:', naicsCodes)
     }
 
-    // Build search query
+    // Get location from request (preferred) or company
+    let searchCity = city
+    let searchState = state
+    let searchCounties: string[] = []
+    let searchCities: string[] = []
+
+    // Prefer location from request if available
+    if (requestData?.target_counties && requestData.target_counties.length > 0) {
+      searchCounties = requestData.target_counties
+      // Convert county slugs to readable names
+      searchCounties = searchCounties.map(county => {
+        const countyMap: { [key: string]: string } = {
+          'los-angeles': 'Los Angeles',
+          'orange': 'Orange County',
+          'san-diego': 'San Diego',
+          'riverside': 'Riverside',
+          'san-bernardino': 'San Bernardino'
+        }
+        return countyMap[county] || county.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+      })
+      console.log('[API] Using counties from request:', searchCounties)
+    }
+
+    if (requestData?.target_cities && requestData.target_cities.length > 0) {
+      searchCities = requestData.target_cities
+      // Convert city slugs to readable names
+      searchCities = searchCities.map(city => {
+        const cityMap: { [key: string]: string } = {
+          'los-angeles-city': 'Los Angeles',
+          'anaheim': 'Anaheim',
+          'san-diego': 'San Diego',
+          'san-jose': 'San Jose',
+          'san-francisco': 'San Francisco'
+        }
+        return cityMap[city] || city.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+      })
+      console.log('[API] Using cities from request:', searchCities)
+    }
+
+    // If no location from request, use company location
+    if (searchCounties.length === 0 && searchCities.length === 0) {
+      if (city && state) {
+        searchCity = city
+        searchState = state
+      } else if (state) {
+        searchState = state
+      }
+    } else {
+      // If we have counties/cities from request, set state to California
+      if (searchCounties.length > 0 || searchCities.length > 0) {
+        searchState = 'California'
+        if (searchCities.length > 0) {
+          searchCity = searchCities[0] // Use first city
+        }
+      }
+    }
+
+    // Build search query with location emphasis
     const searchQuery = braveSearchService.buildCompanyQuery({
       industry: company.industry || '',
-      city: city,
-      state: state,
+      city: searchCity,
+      state: searchState,
       naics_codes: naicsCodes,
-      business_type: company.business_type || ''
+      business_type: company.business_type || '',
+      counties: searchCounties,
+      cities: searchCities
     })
 
     console.log('[API] Search query:', searchQuery)
@@ -127,6 +185,7 @@ export async function POST(request: NextRequest) {
       })
 
       // Filter for actual contract opportunities (not informational pages)
+      // Also filter by location to exclude results from other states
       if (searchResults.results.length > 0) {
         searchResults.results = searchResults.results.filter((result: any) => {
           const url = result.url.toLowerCase()
@@ -138,23 +197,63 @@ export async function POST(request: NextRequest) {
           const excludeKeywords = [
             'blog', 'article', 'guide', 'how to', 'understanding', 
             'what are', '101', 'decoded', 'top codes', 'list of',
-            'importance of', 'why they matter', 'naics codes by domain'
+            'importance of', 'why they matter', 'naics codes by domain',
+            'main page', 'homepage', 'browse opportunities', 'search opportunities'
           ]
           if (excludeKeywords.some(kw => combined.includes(kw))) {
             return false
           }
           
-          // Prioritize actual opportunity sites
+          // Exclude main site pages (homepage, search, browse)
+          const excludePaths = ['/home', '/search', '/browse', '/index', '/main']
+          if (excludePaths.some(path => url.includes(path) && !url.match(/\/opportunity\/|\/solicitation\/|\/rfp\/|\/contract\//))) {
+            return false
+          }
+          
+          // Location filtering - exclude results that clearly mention other states
+          if (searchState && searchState.toLowerCase() === 'california') {
+            const otherStates = ['florida', 'fl ', 'texas', 'tx ', 'new york', 'ny ', 'florida,', 'texas,', 'new york,']
+            const mentionsOtherState = otherStates.some(state => combined.includes(state))
+            if (mentionsOtherState && !combined.includes('california') && !combined.includes('ca ')) {
+              // If it mentions another state but not California, exclude it
+              return false
+            }
+          }
+          
+          // Prioritize actual opportunity sites with specific opportunity paths
           const opportunitySites = [
             'sam.gov', 'beta.sam.gov', 'grants.gov', 'usaspending.gov',
             'contracts.gov', 'fbo.gov', 'govtribe.com', 'governmentcontracts.us'
           ]
-          if (opportunitySites.some(site => url.includes(site))) {
-            return true
+          
+          // For known opportunity sites, require specific opportunity paths
+          if (url.includes('sam.gov') || url.includes('beta.sam.gov')) {
+            // SAM.gov - must have opportunity ID or specific path
+            if (url.match(/\/opportunities\/|\/entity\/|\/view\/|\/award\/|\/contract\/|\/notice\//) || 
+                url.match(/\/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/)) {
+              return true
+            }
+            return false // Exclude main SAM.gov pages
           }
           
-          // Look for opportunity indicators in .gov domains
-          if (url.includes('.gov')) {
+          if (url.includes('governmentcontracts.us')) {
+            // Must have a specific opportunity path
+            if (url.match(/\/contract\/|\/opportunity\/|\/solicitation\/|\/rfp\//)) {
+              return true
+            }
+            return false // Exclude main site pages
+          }
+          
+          // For other opportunity sites, allow if they have opportunity paths
+          if (opportunitySites.some(site => url.includes(site))) {
+            const opportunityPaths = ['/opportunity/', '/solicitation/', '/rfp/', '/contract/', '/award/', '/notice/']
+            if (opportunityPaths.some(path => url.includes(path))) {
+              return true
+            }
+          }
+          
+          // Look for opportunity indicators in .gov domains (but not main pages)
+          if (url.includes('.gov') && !url.match(/\/$|\/index|\/home|\/search|\/browse/)) {
             const opportunityIndicators = [
               'solicitation', 'rfp', 'rfq', 'contract opportunity',
               'pre-solicitation', 'sources sought', 'notice id',
@@ -165,10 +264,7 @@ export async function POST(request: NextRequest) {
             }
           }
           
-          // Fallback: government-related with contract keywords
-          return (url.includes('.gov') || url.includes('.mil')) &&
-                 (combined.includes('contract') || combined.includes('solicitation') ||
-                  combined.includes('rfp') || combined.includes('rfq'))
+          return false
         })
       }
 
@@ -177,9 +273,25 @@ export async function POST(request: NextRequest) {
         console.log('[API] No results after filtering, trying broader query after delay...')
         await delay(2000) // Wait 2 seconds to respect rate limit (1 req/sec for free plan)
         
+        // Build broader query with location emphasis
+        const locationParts: string[] = []
+        if (searchCities.length > 0) {
+          locationParts.push(...searchCities.slice(0, 2))
+        }
+        if (searchCounties.length > 0) {
+          locationParts.push(...searchCounties.slice(0, 2))
+        }
+        if (searchState) {
+          locationParts.push(searchState)
+        }
+        
+        const locationStr = locationParts.length > 0 ? locationParts.join(' ') + ' ' : ''
+        
         const broaderQuery = naicsCodes.length > 0
-          ? `government contracts ${company.industry || ''} NAICS ${naicsCodes.slice(0, 2).join(' ')}`
-          : `government contracts ${company.industry || ''} small business opportunities`
+          ? `government contract opportunity solicitation ${locationStr}${company.industry || ''} NAICS ${naicsCodes.slice(0, 2).join(' ')}`
+          : `government contract opportunity solicitation ${locationStr}${company.industry || ''} small business`
+        
+        console.log('[API] Broader query:', broaderQuery)
         
         searchResults = await braveSearchService.searchOpportunities(broaderQuery, {
           count: 20,
@@ -187,6 +299,7 @@ export async function POST(request: NextRequest) {
         })
         
         // Filter for actual contract opportunities (not informational pages)
+        // Apply same filtering as initial search, including location filtering
         if (searchResults.results.length > 0) {
           searchResults.results = searchResults.results.filter((result: any) => {
             const url = result.url.toLowerCase()
@@ -198,23 +311,57 @@ export async function POST(request: NextRequest) {
             const excludeKeywords = [
               'blog', 'article', 'guide', 'how to', 'understanding', 
               'what are', '101', 'decoded', 'top codes', 'list of',
-              'importance of', 'why they matter', 'naics codes by domain'
+              'importance of', 'why they matter', 'naics codes by domain',
+              'main page', 'homepage', 'browse opportunities', 'search opportunities'
             ]
             if (excludeKeywords.some(kw => combined.includes(kw))) {
               return false
             }
             
-            // Prioritize actual opportunity sites
+            // Exclude main site pages
+            const excludePaths = ['/home', '/search', '/browse', '/index', '/main']
+            if (excludePaths.some(path => url.includes(path) && !url.match(/\/opportunity\/|\/solicitation\/|\/rfp\/|\/contract\//))) {
+              return false
+            }
+            
+            // Location filtering - exclude results that clearly mention other states
+            if (searchState && searchState.toLowerCase() === 'california') {
+              const otherStates = ['florida', 'fl ', 'texas', 'tx ', 'new york', 'ny ', 'florida,', 'texas,', 'new york,']
+              const mentionsOtherState = otherStates.some(state => combined.includes(state))
+              if (mentionsOtherState && !combined.includes('california') && !combined.includes('ca ')) {
+                return false
+              }
+            }
+            
+            // Prioritize actual opportunity sites with specific opportunity paths
+            if (url.includes('sam.gov') || url.includes('beta.sam.gov')) {
+              if (url.match(/\/opportunities\/|\/entity\/|\/view\/|\/award\/|\/contract\/|\/notice\//) || 
+                  url.match(/\/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/)) {
+                return true
+              }
+              return false
+            }
+            
+            if (url.includes('governmentcontracts.us')) {
+              if (url.match(/\/contract\/|\/opportunity\/|\/solicitation\/|\/rfp\//)) {
+                return true
+              }
+              return false
+            }
+            
             const opportunitySites = [
               'sam.gov', 'beta.sam.gov', 'grants.gov', 'usaspending.gov',
               'contracts.gov', 'fbo.gov', 'govtribe.com', 'governmentcontracts.us'
             ]
             if (opportunitySites.some(site => url.includes(site))) {
-              return true
+              const opportunityPaths = ['/opportunity/', '/solicitation/', '/rfp/', '/contract/', '/award/', '/notice/']
+              if (opportunityPaths.some(path => url.includes(path))) {
+                return true
+              }
             }
             
-            // Look for opportunity indicators in .gov domains
-            if (url.includes('.gov')) {
+            // Look for opportunity indicators in .gov domains (but not main pages)
+            if (url.includes('.gov') && !url.match(/\/$|\/index|\/home|\/search|\/browse/)) {
               const opportunityIndicators = [
                 'solicitation', 'rfp', 'rfq', 'contract opportunity',
                 'pre-solicitation', 'sources sought', 'notice id',
@@ -225,10 +372,7 @@ export async function POST(request: NextRequest) {
               }
             }
             
-            // Fallback: government-related with contract keywords
-            return (url.includes('.gov') || url.includes('.mil')) &&
-                   (combined.includes('contract') || combined.includes('solicitation') ||
-                    combined.includes('rfp') || combined.includes('rfq'))
+            return false
           })
         }
       }
