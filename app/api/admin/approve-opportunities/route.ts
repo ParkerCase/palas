@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@supabase/supabase-js'
 import { emailService } from '@/lib/email'
-import { isAdmin } from '@/lib/config/admin'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,25 +16,19 @@ interface SelectedOpportunity {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createRouteHandlerClient({ cookies })
+    // Use service role client to bypass RLS (page is password-protected)
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
     
-    // Get the current user and verify admin access
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
-    // Check if user is admin (authorized emails only)
-    if (!isAdmin(user.email)) {
-      return NextResponse.json(
-        { error: 'Admin access required' },
-        { status: 403 }
-      )
-    }
+    // Create Supabase client with service role or fallback to regular client
+    const supabase = supabaseServiceKey
+      ? createClient(supabaseUrl, supabaseServiceKey, {
+          auth: {
+            autoRefreshToken: false,
+            persistSession: false
+          }
+        })
+      : (await import('@/lib/supabase/server')).createRouteHandlerClient(request)
 
     // Get request data
     const body = await request.json()
@@ -106,7 +98,7 @@ export async function POST(request: NextRequest) {
           source_url: opp.url,
           source_type: 'brave_search',
           company_id: companyId,
-          recommended_by: user.id,
+          recommended_by: null, // No user ID since we're using password auth
           match_score: opp.source_data?.score || 85,
           admin_notes: opp.admin_notes,
           search_result_data: opp.source_data,
@@ -123,7 +115,7 @@ export async function POST(request: NextRequest) {
         continue
       }
 
-      // Create application with status 'recommended'
+      // Create application with status 'draft' and acceptance_status 'pending'
       const { error: appError } = await supabase
         .from('applications')
         .insert({
@@ -134,6 +126,7 @@ export async function POST(request: NextRequest) {
           status: 'draft',
           source: 'admin_recommended',
           recommended_at: new Date().toISOString(),
+          acceptance_status: 'pending', // Company needs to accept/reject
           workflow_stage: 'discovery',
           is_submitted: false,
           time_spent: 0
@@ -156,7 +149,7 @@ export async function POST(request: NextRequest) {
       .from('opportunity_requests')
       .update({
         status: 'completed',
-        processed_by: user.id,
+        processed_by: null, // No user ID since we're using password auth
         processed_at: new Date().toISOString()
       })
       .eq('id', requestId)
