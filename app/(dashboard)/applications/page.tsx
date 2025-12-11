@@ -3,7 +3,6 @@
 import { useAuth } from '../../components/auth/AuthProvider'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { createClientComponentClient } from '@/lib/supabase/client'
 import { Card, CardContent} from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -23,7 +22,6 @@ export default function ApplicationsPage() {
   const router = useRouter()
   const [applications, setApplications] = useState<Application[]>([])
   const [loadingData, setLoadingData] = useState(true)
-  const supabase = createClientComponentClient()
 
   useEffect(() => {
     // TESTING MODE: Skip auth redirect
@@ -37,6 +35,7 @@ export default function ApplicationsPage() {
     if (user) {
       loadApplications()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, loading, router])
 
   const loadApplications = async () => {
@@ -123,7 +122,7 @@ export default function ApplicationsPage() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Bidded Opportunities</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">Track our Applications</h2>
           <p className="text-gray-600">
             Track your government contract and grant applications
           </p>

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -23,6 +23,13 @@ const PLANS = [
     price: "$99/mo",
     features: ["Up to 20 users", "Advanced analytics", "Priority support"],
     stripePriceId: "price_pro_TODO"
+  },
+  {
+    id: "consultant",
+    name: "Consultant",
+    price: "$149/mo",
+    features: ["Unlimited client access", "Multi-client dashboard", "Client management tools", "Priority support"],
+    stripePriceId: "price_consultant_TODO"
   },
   {
     id: "enterprise",
@@ -59,7 +66,6 @@ export default function SubscriptionPage() {
   // Check for success/cancel messages from Stripe
   useEffect(() => {
     const success = searchParams.get('success')
-    const canceled = searchParams.get('canceled')
     
     if (success) {
       // Refresh subscription data after successful checkout
@@ -70,6 +76,7 @@ export default function SubscriptionPage() {
   // Load user and subscription data
   useEffect(() => {
     loadUserAndSubscription()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const loadUserAndSubscription = async () => {
@@ -213,13 +220,13 @@ export default function SubscriptionPage() {
       <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
         <CreditCard className="w-7 h-7" /> Subscriptions
       </h1>
-      <p className="text-muted-foreground mb-6">Manage your company's subscription plan. Upgrade, downgrade, or manage your billing securely via Stripe.</p>
+      <p className="text-muted-foreground mb-6">Manage your company&apos;s subscription plan. Upgrade, downgrade, or manage your billing securely via Stripe.</p>
 
       {/* Current Subscription */}
       <Card>
         <CardHeader>
           <CardTitle>Current Subscription</CardTitle>
-          <CardDescription>Your company's active plan and billing status.</CardDescription>
+          <CardDescription>Your company&apos;s active plan and billing status.</CardDescription>
         </CardHeader>
         <CardContent>
           {subscription ? (

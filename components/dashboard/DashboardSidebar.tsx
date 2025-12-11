@@ -8,18 +8,11 @@ import {
   Target, 
   FileText, 
   Building2, 
-  BarChart3, 
-  Settings,
   CreditCard,
-  Users,
   HelpCircle,
   ChevronLeft,
   ChevronRight,
   Book,
-  GraduationCap,
-  Heart,
-  HardHat,
-  Factory,
   Sparkles,
   Eye
 } from 'lucide-react'
@@ -41,7 +34,7 @@ interface DashboardSidebarProps {
 interface NavigationItem {
   name: string
   href: string
-  icon: any
+  icon: React.ComponentType<{ className?: string }>
   current: boolean
   featured?: boolean
   disabled?: boolean
@@ -59,7 +52,7 @@ const navigation: NavigationItem[] = [
     icon: Target,
     current: false},
   {
-    name: 'Bidded Opportunities',
+    name: 'Track our Applications',
     href: '/applications',
     icon: FileText,
     current: false},
@@ -81,38 +74,6 @@ const navigation: NavigationItem[] = [
     current: false},
 ]
 
-const sectorNavigation = [
-  {
-    name: 'Education',
-    href: '/education',
-    icon: GraduationCap,
-    current: false,
-    disabled: true},
-  {
-    name: 'Healthcare',
-    href: '/healthcare',
-    icon: Heart,
-    current: false,
-    disabled: true},
-  {
-    name: 'Construction',
-    href: '/construction',
-    icon: HardHat,
-    current: false,
-    disabled: true},
-  {
-    name: 'Manufacturing',
-    href: '/manufacturing',
-    icon: Factory,
-    current: false,
-    disabled: true},
-  {
-    name: 'Government',
-    href: '/government',
-    icon: Building2,
-    current: false,
-    disabled: true},
-]
 
 const adminNavigation = [
   {

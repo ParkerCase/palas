@@ -3,12 +3,11 @@
 import { useAuth } from '../../components/auth/AuthProvider'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { createClientComponentClient } from '@/lib/supabase/client'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { PlayCircle, CheckCircle, Clock, BookOpen, Award} from 'lucide-react'
+import { PlayCircle, Clock, BookOpen, Award} from 'lucide-react'
 
 interface Course {
   id: string
@@ -24,22 +23,13 @@ interface Course {
   students: number
 }
 
-interface Module {
-  id: string
-  title: string
-  duration: string
-  status: 'locked' | 'available' | 'completed'
-  type: 'video' | 'document' | 'quiz'
-}
 
 export default function CoursesPage() {
   const { user, loading } = useAuth()
   const router = useRouter()
   const [courses, setCourses] = useState<Course[]>([])
   const [currentCourse, setCurrentCourse] = useState<Course | null>(null)
-  const [modules, setModules] = useState<Module[]>([])
   const [loadingData, setLoadingData] = useState(true)
-  const supabase = createClientComponentClient()
 
   useEffect(() => {
     // TESTING MODE: Skip auth redirect
@@ -100,65 +90,10 @@ export default function CoursesPage() {
       
       setCourses(mockCourses)
       setCurrentCourse(mockCourses[0]) // Set first course as current
-      loadModules(mockCourses[0].id)
     } catch (error) {
       console.error('Failed to load courses:', error)
     } finally {
       setLoadingData(false)
-    }
-  }
-
-  const loadModules = async (courseId: string) => {
-    try {
-      // Government Procurement 101 modules
-      const mockModules = [
-        {
-          id: 'module-001',
-          title: 'MODULE 1: Introduction to Government Contracting',
-          duration: '45 min',
-          status: 'completed' as const,
-          type: 'video' as const
-        },
-        {
-          id: 'module-002',
-          title: 'MODULE 2: Business Registration and Certifications',
-          duration: '60 min',
-          status: 'completed' as const,
-          type: 'video' as const
-        },
-        {
-          id: 'module-003',
-          title: 'MODULE 3: Understanding Federal Acquisition Regulation (FAR)',
-          duration: '75 min',
-          status: 'available' as const,
-          type: 'video' as const
-        },
-        {
-          id: 'module-004',
-          title: 'MODULE 4: Proposal Writing and Submission',
-          duration: '90 min',
-          status: 'locked' as const,
-          type: 'video' as const
-        },
-        {
-          id: 'module-005',
-          title: 'MODULE 5: Contract Performance and Compliance',
-          duration: '60 min',
-          status: 'locked' as const,
-          type: 'video' as const
-        },
-        {
-          id: 'module-006',
-          title: 'MODULE 6: Advanced Strategies and Best Practices',
-          duration: '70 min',
-          status: 'locked' as const,
-          type: 'video' as const
-        }
-      ]
-      
-      setModules(mockModules)
-    } catch (error) {
-      console.error('Failed to load modules:', error)
     }
   }
 
@@ -171,12 +106,6 @@ export default function CoursesPage() {
     return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800'
   }
 
-  const getModuleIcon = (status: string, type: string) => {
-    if (status === 'completed') return <CheckCircle className="h-5 w-5 text-green-600" />
-    if (status === 'locked') return <Clock className="h-5 w-5 text-gray-400" />
-    if (type === 'video') return <PlayCircle className="h-5 w-5 text-blue-600" />
-    return <BookOpen className="h-5 w-5 text-blue-600" />
-  }
 
   if (loading || loadingData) {
     return (
@@ -222,7 +151,6 @@ export default function CoursesPage() {
                   }`}
                   onClick={() => {
                     setCurrentCourse(course)
-                    loadModules(course.id)
                   }}
                 >
                   <CardContent className="p-4">
@@ -318,8 +246,8 @@ export default function CoursesPage() {
                   </CardContent>
                 </Card>
 
-                {/* Course Modules */}
-                <Card>
+                {/* Course Modules - Hidden per design requirements */}
+                {/* <Card>
                   <CardHeader>
                     <CardTitle>Course Modules</CardTitle>
                   </CardHeader>
@@ -364,7 +292,7 @@ export default function CoursesPage() {
                       ))}
                     </div>
                   </CardContent>
-                </Card>
+                </Card> */}
               </div>
             )}
           </div>
